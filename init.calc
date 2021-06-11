@@ -1,0 +1,42 @@
+k= 1.38064852e-23
+g= 9.80665
+
+G= 6.67408e-11
+
+c=2.99792458e8
+qe=1.602176565e-19
+h=6.62606957e-34
+
+mu0=4*_pi*1e-7
+e0=1/_mu0/_c^2
+me=9.10938346e-31
+
+mp=1.672621898e-27
+mn=1.674927471e-27
+
+u= 1.660539040e-27
+
+R=  8.3144598
+Na= 6.02214076e23
+
+sigma= 2*pi^5*k^4/15/h^3/c^2,numer
+
+E0= 1367
+
+rSun= 6.96342e8
+mSun= 1,98892e30
+
+rEarthAquator= 12756.27e3/2
+rEathPolar= 12713.50e3/2
+rEarth= (rEarthAquator+rEarthPolar)/2
+mEarth= 5.9724e24
+
+AE= 149597870700
+
+rMoon= 3474e3/2
+mMoon= 7.346e22
+
+malpha=4.001506179125*_u
+
+mHe4Kern=_malpha
+
