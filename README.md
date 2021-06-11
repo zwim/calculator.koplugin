@@ -1,2 +1,4 @@
 # calculator.koplugin
-A calculator plugin for KOReader
+A calculator plugin for KOReader.
+
+Will come soon.
