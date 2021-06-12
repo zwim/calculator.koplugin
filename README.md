@@ -2,7 +2,7 @@
 A calculator plugin for KOReader.
 
 ## Installation
-Copy the whole folder (incl. formulaparser subfolder) to `koreader/calculator.koplugin`. You can delete all `.git*` files and folders.
+Download the desired `koreader.plugin-x.x.x.zip` and unpack it to `koreader/calculator.koplugin`. 
 
 If you want predefined physical constants, then move `init.calc` to `koreader/`, otherwise you can delete `init.calc`.
 
