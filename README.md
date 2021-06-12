@@ -11,6 +11,8 @@ The file `VERSION` is used for update-informations. If you delete it, you don't 
 
 ## Usage
 
+You find the calculator in `More tools/calculator` additionally you can set a gesture (in the device submenu) to call it.
+
 Enter a calculation and press `Calc`. You can see your inputs in lines starting with `ixxx:` and the results in lines with `oxxx:`.
 
 If you change something in an old line, this line will be used for the next calculation.
@@ -51,7 +53,7 @@ Variables names may start with [_A-Za-z] but not with [0-9]
 
     If you define "b=2,x:=4+b" and then set "b=5", "x" evaluates to 9.
     So you can use the variable like a function.
-    
+
 2.) Variables stored with "=":
 
     If you define "b=2,x=4+b" and then set "b=5", "x" evaluates to 6
