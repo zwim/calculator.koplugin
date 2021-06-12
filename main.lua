@@ -92,7 +92,7 @@ function Calculator:addToMainMenu(menu_items)
 end
 
 function Calculator:onDispatcherRegisterActions()
-    Dispatcher:registerAction("show_calculator", { category = "none", event = "CalculatorStart", title = _("Show calculator"), device = true, })
+    Dispatcher:registerAction("show_calculator", { category = "none", event = "CalculatorStart", title = _("Calculator"), device = true, })
 end
 
 function Calculator:getString(format, table)
@@ -300,7 +300,7 @@ function Calculator:formatResult(val, format, round)
 
     if format == "scientific" or format == "engineer" then
         ret = string.format("%." .. round .. "E", val)
-    elseif format == "auto" then
+    elseif format == "auto" or format == "programmer" then
         if val == 0 then
             return "" .. 0
         elseif math.abs(val) >= 10^self.upper_bound or math.abs(val) <= 0.1^self.lower_bound then
@@ -323,7 +323,7 @@ function Calculator:formatResult(val, format, round)
         for i = 16-4,4,-4 do
             tmp = tmp:sub(1,i) .. "'" .. tmp:sub(i+1)
         end
-        ret = string.format("%15s  0x%s", ret, tmp)
+        ret = string.format("%14s  0x%s", ret, tmp)
     end
 
     return ret
