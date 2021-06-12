@@ -18,15 +18,16 @@ local logger = require("logger")
 local util = require("ffi/util")
 local _ = require("gettext")
 
-local CalculatorSettingsDialog = require("calculatorsettingsdialog")
-
 local EXTERNAL_PLUGIN = DataStorage:getDataDir() .. "/plugins/calculator.koplugin/formulaparser"
+logger.err("exernal: " .. EXTERNAL_PLUGIN)
 if lfs.attributes(EXTERNAL_PLUGIN, "mode") == "directory" then
+    logger.err("Before: " .. package.path)
     package.path = string.format("%s/?.lua;%s", EXTERNAL_PLUGIN, package.path)
+    logger.err("After:  " .. package.path)
 end
 
+local CalculatorSettingsDialog = require("calculatorsettingsdialog")
 local Parser = require("formulaparser")
-
 
 local Calculator = WidgetContainer:new{
     name = "calculator",
