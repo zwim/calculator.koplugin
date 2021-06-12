@@ -92,7 +92,8 @@ function Calculator:addToMainMenu(menu_items)
 end
 
 function Calculator:onDispatcherRegisterActions()
-    Dispatcher:registerAction("show_calculator", { category = "none", event = "CalculatorStart", title = _("Calculator"), device = true, })
+    Dispatcher:registerAction("show_calculator",
+        { category = "none", event = "CalculatorStart", title = _("Calculator"), device = true, })
 end
 
 function Calculator:getString(format, table)
@@ -264,7 +265,8 @@ function Calculator:dump(file_name)
 end
 
 function Calculator:insertBraces(str)
-    local function_names={"exp", "sin", "cos", "tan", "asin", "acos", "atan", "ln", "ld", "log", "sqrt", "√", "rnd", "floor", "showvars"}
+    local function_names={"exp", "sin", "cos", "tan", "asin", "acos", "atan", "ln", "ld", "log",
+        "sqrt", "√", "rnd", "floor", "showvars"}
     str = str:gsub("EE","E")
     for _, func in pairs(function_names) do
         local _, pos = str:find("^" .. func .. "[^(]")
@@ -362,8 +364,10 @@ function Calculator:calculate(input_text)
             self.history = input_text .. "\n" .. Parser:text2greek(last_result)
         elseif last_result ~= nil and not last_err then
             self.input[#self.input + 1] = new_command
-            Parser:eval(Parser:parse("o" .. #self.input .. ":=" .. tostring(last_result))) -- last result is stored in "oxxx"
-            Parser:eval(Parser:parse("ans:" .. tostring(last_result))) -- last result is stored in "ans"
+            -- last result is stored in "oxxx"
+            Parser:eval(Parser:parse("o" .. #self.input .. ":=" .. tostring(last_result)))
+            -- last result is stored in "ans"
+            Parser:eval(Parser:parse("ans:" .. tostring(last_result)))
             last_result = self:formatResult(last_result, self.number_format, self.round_places)
 
             if command_position ~= #input_table then  -- an old entry was changed
@@ -371,12 +375,14 @@ function Calculator:calculate(input_text)
             else -- a new formula is entered
                 local index = input_text:find("\n[^\n]*$")
                 if not index then -- first entry
-                    self.history = "i" .. #self.input .. ": " .. Parser:text2greek(new_command) .. " "
+                    self.history = "i" .. #self.input .. ": " .. Parser:text2greek(new_command)
                 else
-                    self.history = input_text:sub(1,index) .. "i" .. #self.input .. ": " .. Parser:text2greek(new_command) .. " "
+                    self.history = input_text:sub(1,index) .. "i" .. #self.input .. ": "
+                        .. Parser:text2greek(new_command)
                 end
             end
-            self.history = self.history  .. "\no" .. #self.input .. ": " .. Parser:text2greek(tostring(last_result)) .. "\n"
+            self.history = self.history  .. "\no" .. #self.input .. ": "
+                .. Parser:text2greek(tostring(last_result)) .. "\n"
         else
             self.history = input_text
             UIManager:show(InfoMessage:new{
@@ -404,8 +410,6 @@ function Calculator:getLatestVersion(url, timeout, maxtime)
     local socket = require("socket")
     local socketutil = require("socketutil")
     local socket_url = require("socket.url")
-
-    local parsed = socket_url.parse(url)
 
     local sink = {}
     socketutil:set_timeout(timeout or 10, maxtime or 30)
