@@ -6,6 +6,8 @@ Copy the whole folder (incl. formulaparser subfolder) to `koreader/calculator.ko
 
 If you want predefined physical constants, then move `init.calc` to `koreader/`, otherwise you can delete `init.calc`.
 
+The file `VERSION` is used for update-informations. If you delete it, you don't get a notification update.
+
 
 ## Usage
 
