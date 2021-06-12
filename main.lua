@@ -19,15 +19,15 @@ local util = require("ffi/util")
 local _ = require("gettext")
 
 local EXTERNAL_PLUGIN = DataStorage:getDataDir() .. "/plugins/calculator.koplugin/formulaparser"
-logger.err("exernal: " .. EXTERNAL_PLUGIN)
 if lfs.attributes(EXTERNAL_PLUGIN, "mode") == "directory" then
-    logger.err("Before: " .. package.path)
     package.path = string.format("%s/?.lua;%s", EXTERNAL_PLUGIN, package.path)
-    logger.err("After:  " .. package.path)
 end
 
 local CalculatorSettingsDialog = require("calculatorsettingsdialog")
 local Parser = require("formulaparser")
+
+local VERSION_FILE = DataStorage:getDataDir() .. "/plugins/calculator.koplugin/VERSION"
+local LATEST_VERSION = "https://raw.githubusercontent.com/zwim/calculator.koplugin/master/VERSION"
 
 local Calculator = WidgetContainer:new{
     name = "calculator",
@@ -133,9 +133,21 @@ function Calculator:onCalculatorStart()
 
     self.status_line = self.status_line or self:getStatusLine()
 
+    local hint = _("Enter your calculations or\ntype 'help()' and press 'Calc'")
+    local current_version = self:getCurrentVersion()
+    local latest_version = self:getLatestVersion(LATEST_VERSION, 20, 60)
+    if latest_version and current_version and latest_version > current_version then
+        hint = hint .. "\n\n" .. _("A calculator update is available:") .. "\n"
+        if current_version then
+            hint = hint .. "Current-" .. current_version
+        end
+        if latest_version then
+            hint = hint .. "Latest-" .. latest_version
+        end
+    end
     self.input_dialog = InputDialog:new{
         title =  _("Calculator"),
-        input_hint = _("Enter your calculations or\ntype 'help()' and press 'Calc'"),
+        input_hint = hint,
         description = self.status_line,
         description_face= Font:getFace("scfont"),
         input = self.history,
@@ -161,7 +173,6 @@ function Calculator:onCalculatorStart()
             {
             text = _("Clear"),
             callback = function()
-                -- xxx dialog to clear all
                 Parser:eval("kill()")
                 self.history = ""
                 self.input = {}
@@ -373,6 +384,64 @@ function Calculator:calculate(input_text)
                 })
         end
     end
+end
+
+function Calculator:getCurrentVersion()
+    local file = io.open(VERSION_FILE, "r")
+    local version
+    if file then
+        version = file:read("*a")
+        file:close()
+    else
+        logger.warn("Did not find version file " .. VERSION_FILE )
+    end
+    return version
+end
+
+function Calculator:getLatestVersion(url, timeout, maxtime)
+    local http = require("socket.http")
+    local ltn12 = require("ltn12")
+    local socket = require("socket")
+    local socketutil = require("socketutil")
+    local socket_url = require("socket.url")
+
+    local parsed = socket_url.parse(url)
+
+    local sink = {}
+    socketutil:set_timeout(timeout or 10, maxtime or 30)
+    local request = {
+        url     = url,
+        method  = "GET",
+        sink    = maxtime and socketutil.table_sink(sink) or ltn12.sink.table(sink),
+    }
+
+    local code, headers, status = socket.skip(1, http.request(request))
+    socketutil:reset_timeout()
+    local content = table.concat(sink) -- empty or content accumulated till now
+
+    if code == socketutil.TIMEOUT_CODE or
+       code == socketutil.SSL_HANDSHAKE_CODE or
+       code == socketutil.SINK_TIMEOUT_CODE
+    then
+        logger.warn("request interrupted:", code)
+        return false, code
+    end
+    if headers == nil then
+        logger.warn("No HTTP headers:", code, status)
+        return false, "Network or remote server unavailable"
+    end
+    if not code or string.sub(code, 1, 1) ~= "2" then -- all 200..299 HTTP codes are OK
+        logger.warn("HTTP status not okay:", code, status)
+        return false, "Remote server error or unavailable"
+    end
+    if headers and headers["content-length"] then
+        -- Check we really got the announced content size
+        local content_length = tonumber(headers["content-length"])
+        if #content ~= content_length then
+            return false, "Incomplete content received"
+        end
+    end
+    return content
 end
 
 return Calculator
