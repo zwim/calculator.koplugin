@@ -2,8 +2,6 @@
 This plugin provides a sophisicated calculator
 ]]
 
-package.path = string.format("%s;%s/?.lua", package.path, "plugins/calculator.koplugin/formulaparser")
-
 local DataStorage = require("datastorage")
 local Dispatcher = require("dispatcher")
 local Font = require("ui/font")
@@ -15,12 +13,19 @@ local UIManager = require("ui/uimanager")
 local Util = require("util")
 local VirtualKeyboard = require("ui/widget/virtualkeyboard")
 local WidgetContainer = require("ui/widget/container/widgetcontainer")
+local lfs = require("libs/libkoreader-lfs")
 local logger = require("logger")
 local util = require("ffi/util")
 local _ = require("gettext")
 
 local CalculatorSettingsDialog = require("calculatorsettingsdialog")
-local Parser = require("formulaparser/formulaparser")
+
+local EXTERNAL_PLUGIN = DataStorage:getDataDir() .. "/plugins/calculator.koplugin/formulaparser"
+if lfs.attributes(EXTERNAL_PLUGIN, "mode") == "directory" then
+    package.path = string.format("%s/?.lua;%s", EXTERNAL_PLUGIN, package.path)
+end
+
+local Parser = require("formulaparser")
 
 
 local Calculator = WidgetContainer:new{
