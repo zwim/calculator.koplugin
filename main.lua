@@ -273,13 +273,13 @@ function Calculator:insertBraces(str)
         "sqrt", "√", "rnd", "floor", "showvars"}
     str = str:gsub("EE","E")
     for _, func in pairs(function_names) do
-        local _, pos = str:find("^" .. func .. "[^(]")
-        if pos == 0 then
-            _, pos = str:find("[^%a^d_]" .. func .. "[^(]")
+        local _, pos = str:find("^" .. func .. "[^(%a]")
+        if not pos then
+            _, pos = str:find("[^%a^_]" .. func .. "[^(%a]")
         end
         while pos do
             str = str:sub(1, pos-1) .. "(" .. str:sub(pos)
-            _, pos = str:find("[^%a^d_]" .. func .. "[^(]")
+            _, pos = str:find("[^%a^_]" .. func .. "[^(%a]")
         end
     end
     local _, count_opening = str:gsub("%(", "")
