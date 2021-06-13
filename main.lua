@@ -140,6 +140,7 @@ function Calculator:onCalculatorStart()
 or type 'help()⮠']])
     local current_version = self:getCurrentVersion()
     local latest_version = self:getLatestVersion(LATEST_VERSION, 20, 60)
+
     if latest_version and current_version and latest_version > current_version then
         hint = hint .. "\n\n" .. _("A calculator update is available:") .. "\n"
         if current_version then
@@ -406,7 +407,6 @@ function Calculator:getLatestVersion(url, timeout, maxtime)
     local ltn12 = require("ltn12")
     local socket = require("socket")
     local socketutil = require("socketutil")
-    local socket_url = require("socket.url")
 
     local sink = {}
     socketutil:set_timeout(timeout or 10, maxtime or 30)
