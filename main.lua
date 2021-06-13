@@ -111,7 +111,7 @@ function Calculator:getStatusLine()
     angle_mode = angle_mode .. (" "):rep(9-#angle_mode)
     local format = self:getString(self.number_format, self.number_formats)
     format = format .. (" "):rep(12-#format)
-    return string.format(_("Angle: %s Format: %s Round: %d"),
+    return string.format(_("∡ %s      Format: %s      ≈%d"),
         angle_mode, format, self.round_places)
 end
 
@@ -134,7 +134,10 @@ function Calculator:onCalculatorStart()
 
     self.status_line = self.status_line or self:getStatusLine()
 
-    local hint = _("Enter your calculations or\ntype 'help()' and press 'Calc'")
+    local hint = _([[Enter your calculations and press '⮠'
+'Σ=' Calculate, '⎚' Clear, '⇧' Load,
+'⇩' Store, '☰' Settings, '✕' Close
+or type 'help()⮠']])
     local current_version = self:getCurrentVersion()
     local latest_version = self:getLatestVersion(LATEST_VERSION, 20, 60)
     if latest_version and current_version and latest_version > current_version then
@@ -161,7 +164,7 @@ function Calculator:onCalculatorStart()
         lang = "Calculator",
         buttons = {{
             {
-            text = _("Calc"),
+            text = "Σ=",
             is_enter_default = true,
             callback = function()
                 Trapper:wrap(function()
@@ -172,7 +175,7 @@ function Calculator:onCalculatorStart()
             end,
             },
             {
-            text = _("Clear"),
+            text = "⎚",
             callback = function()
                 Parser:eval("kill()")
                 self.history = ""
@@ -181,13 +184,13 @@ function Calculator:onCalculatorStart()
             end,
             },
             {
-            text = _("Load"),
+            text = "⇧",
             callback = function()
                 self:load(self.init_file)
             end,
             },
             {
-            text = _("Save"),
+            text = "⇩",
             callback = function()
                 self:dump(self.dump_file)
             end,
@@ -202,7 +205,7 @@ function Calculator:onCalculatorStart()
             end,
             },
             {
-            text = _("Close"),
+            text = "✕",
             callback = function()
                 self:restoreKeyboard()
                 UIManager:close(self.input_dialog)
@@ -349,12 +352,6 @@ function Calculator:calculate(input_text)
     if command_position and input_table[command_position] then
         local new_command = input_table[command_position]
         new_command = Parser:greek2text(new_command)
-        print()
-        print()
-        print()
-        print()
-        print()
-        print(new_command)
         new_command = new_command:gsub("^[io][0-9]*: ","")  -- strip leading "ixxx: " or "oxxx: "
         new_command = self:insertBraces(new_command)
 
