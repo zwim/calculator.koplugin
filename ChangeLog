@@ -1,0 +1,7 @@
+Version: 0.9.1
+  Use Unicode symbols instead of text (Translations!!!)
+  Typo in help text 3<4 -> true
+  Release package: Add `calculator.koplugin` folder 
+
+Version: 0.9.0
+  Initial commit
