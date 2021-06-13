@@ -2,7 +2,7 @@
 A calculator plugin for KOReader.
 
 ## Installation
-Go to https://github.com/zwim/calculator.koplugin/releases and download the desired `koreader.plugin-x.x.x.zip` and unpack it to `koreader/calculator.koplugin`. 
+Go to https://github.com/zwim/calculator.koplugin/releases and download the desired `koreader.plugin-x.x.x.zip` and unpack it to `koreader/plugins/calculator.koplugin`.
 
 If you want predefined physical constants, then move `init.calc` to `koreader/`, otherwise you can delete `init.calc`.
 
@@ -129,7 +129,7 @@ Examples:
 ```
     3+4*5    -> 23
     ld(1024) -> 10
-    3>4      -> true
+    3<4      -> true
     4!=4     -> false
     x= 3>4 ? 1 : -1 -> -1, set x=-1
     x=2,y=4  -> 4, set x=2 and y=4

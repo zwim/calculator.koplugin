@@ -191,7 +191,7 @@ function CalculatorSettingsDialog:init()
                 VerticalGroup:new{ -- angle and format
                     align = "center",
                     TextWidget:new{
-                        text = _("Angle"),
+                        text = _("Angle ∡"),
                         face =  self.text_face,
                     },
                     VerticalSpan:new{width = Size.span.vertical_large*2},
@@ -220,7 +220,7 @@ function CalculatorSettingsDialog:init()
                     align = "center",
                     -- round
                     TextWidget:new{
-                        text = _("Rounding"),
+                        text = _("Rounding ≈"),
                         face =  self.text_face,
                     },
 

@@ -1,17 +1,31 @@
+VERSION=$(shell grep Version: VERSION | sed 's/Version: //g')
 
-all:
+test:
 	cd formulaparser && lua parser-test.lua && cd ..
-	rm calculator.plugin-0.9.0.zip -f
-	7z u -l -mx=9 \
-		calculator.plugin-0.9.0.zip * \
-		-xr!.git* \
-		-xr!.editorconfig$ \
-		-xr!formulaparser/.git* \
-		-xr!LICENSE$ \
-		-xr!README.md$ \
-		-xr!*.swp$ \
-		-xr!*.zip$ \
-		-xr!*test.lua$ \
-		-xr!install-plugin.sh$
+
+clean: 
+	rm calculator.koplugin-$(VERSION).zip -f
+	rm -rf tmp/calculator.koplugin
 
 
+zip: clean
+
+	mkdir -p tmp/calculator.koplugin
+	rsync -a --cvs-exclude \
+		--exclude '*.editorconfig' \
+		--exclude '*.gitignore' \
+		--exclude 'Makefile' \
+		--exclude 'LICENSE' \
+		--exclude 'README.md' \
+		--exclude '*test.lua' \
+		--exclude '*.swp' \
+		--exclude '*.zip' \
+		--exclude '*install-plugin.sh' \
+		--exclude 'tmp*' \
+		. tmp/calculator.koplugin
+
+	cd tmp && 7z a -l -mx9 -mfb=256 -mmt=on \
+		../calculator.koplugin-$(VERSION).zip *
+	
+
+all: test clean zip

@@ -2,18 +2,6 @@
     Keyboard layout for calculator
 ]]
 
-
-print("xxxxxxxxxx")
-print("xxxxxxxxxx")
-print("xxxxxxxxxx")
-print("xxxxxxxxxx")
-print("xxxxxxxxxx")
-print("xxxxxxxxxx")
-print("xxxxxxxxxx")
-print("xxxxxxxxxx")
-print("xxxxxxxxxx")
-
-
 local calc_popup = {
    _a_ = {
         "a",

@@ -92,7 +92,8 @@ function Calculator:addToMainMenu(menu_items)
 end
 
 function Calculator:onDispatcherRegisterActions()
-    Dispatcher:registerAction("show_calculator", { category = "none", event = "CalculatorStart", title = _("Calculator"), device = true, })
+    Dispatcher:registerAction("show_calculator",
+        { category = "none", event = "CalculatorStart", title = _("Calculator"), device = true, })
 end
 
 function Calculator:getString(format, table)
@@ -110,7 +111,7 @@ function Calculator:getStatusLine()
     angle_mode = angle_mode .. (" "):rep(9-#angle_mode)
     local format = self:getString(self.number_format, self.number_formats)
     format = format .. (" "):rep(12-#format)
-    return string.format(_("Angle: %s Format: %s Round: %d"),
+    return string.format(_("∡ %s      Format: %s      ≈%d"),
         angle_mode, format, self.round_places)
 end
 
@@ -133,9 +134,13 @@ function Calculator:onCalculatorStart()
 
     self.status_line = self.status_line or self:getStatusLine()
 
-    local hint = _("Enter your calculations or\ntype 'help()' and press 'Calc'")
+    local hint = _([[Enter your calculations and press '⮠'
+'Σ=' Calculate, '⎚' Clear, '⇧' Load,
+'⇩' Store, '☰' Settings, '✕' Close
+or type 'help()⮠']])
     local current_version = self:getCurrentVersion()
     local latest_version = self:getLatestVersion(LATEST_VERSION, 20, 60)
+
     if latest_version and current_version and latest_version > current_version then
         hint = hint .. "\n\n" .. _("A calculator update is available:") .. "\n"
         if current_version then
@@ -160,7 +165,7 @@ function Calculator:onCalculatorStart()
         lang = "Calculator",
         buttons = {{
             {
-            text = _("Calc"),
+            text = "Σ=",
             is_enter_default = true,
             callback = function()
                 Trapper:wrap(function()
@@ -171,7 +176,7 @@ function Calculator:onCalculatorStart()
             end,
             },
             {
-            text = _("Clear"),
+            text = "⎚",
             callback = function()
                 Parser:eval("kill()")
                 self.history = ""
@@ -180,13 +185,13 @@ function Calculator:onCalculatorStart()
             end,
             },
             {
-            text = _("Load"),
+            text = "⇧",
             callback = function()
                 self:load(self.init_file)
             end,
             },
             {
-            text = _("Save"),
+            text = "⇩",
             callback = function()
                 self:dump(self.dump_file)
             end,
@@ -201,7 +206,7 @@ function Calculator:onCalculatorStart()
             end,
             },
             {
-            text = _("Close"),
+            text = "✕",
             callback = function()
                 self:restoreKeyboard()
                 UIManager:close(self.input_dialog)
@@ -264,7 +269,8 @@ function Calculator:dump(file_name)
 end
 
 function Calculator:insertBraces(str)
-    local function_names={"exp", "sin", "cos", "tan", "asin", "acos", "atan", "ln", "ld", "log", "sqrt", "√", "rnd", "floor", "showvars"}
+    local function_names={"exp", "sin", "cos", "tan", "asin", "acos", "atan", "ln", "ld", "log",
+        "sqrt", "√", "rnd", "floor", "showvars"}
     str = str:gsub("EE","E")
     for _, func in pairs(function_names) do
         local _, pos = str:find("^" .. func .. "[^(]")
@@ -347,12 +353,6 @@ function Calculator:calculate(input_text)
     if command_position and input_table[command_position] then
         local new_command = input_table[command_position]
         new_command = Parser:greek2text(new_command)
-        print()
-        print()
-        print()
-        print()
-        print()
-        print(new_command)
         new_command = new_command:gsub("^[io][0-9]*: ","")  -- strip leading "ixxx: " or "oxxx: "
         new_command = self:insertBraces(new_command)
 
@@ -362,8 +362,10 @@ function Calculator:calculate(input_text)
             self.history = input_text .. "\n" .. Parser:text2greek(last_result)
         elseif last_result ~= nil and not last_err then
             self.input[#self.input + 1] = new_command
-            Parser:eval(Parser:parse("o" .. #self.input .. ":=" .. tostring(last_result))) -- last result is stored in "oxxx"
-            Parser:eval(Parser:parse("ans:" .. tostring(last_result))) -- last result is stored in "ans"
+            -- last result is stored in "oxxx"
+            Parser:eval(Parser:parse("o" .. #self.input .. ":=" .. tostring(last_result)))
+            -- last result is stored in "ans"
+            Parser:eval(Parser:parse("ans:" .. tostring(last_result)))
             last_result = self:formatResult(last_result, self.number_format, self.round_places)
 
             if command_position ~= #input_table then  -- an old entry was changed
@@ -371,12 +373,14 @@ function Calculator:calculate(input_text)
             else -- a new formula is entered
                 local index = input_text:find("\n[^\n]*$")
                 if not index then -- first entry
-                    self.history = "i" .. #self.input .. ": " .. Parser:text2greek(new_command) .. " "
+                    self.history = "i" .. #self.input .. ": " .. Parser:text2greek(new_command)
                 else
-                    self.history = input_text:sub(1,index) .. "i" .. #self.input .. ": " .. Parser:text2greek(new_command) .. " "
+                    self.history = input_text:sub(1,index) .. "i" .. #self.input .. ": "
+                        .. Parser:text2greek(new_command)
                 end
             end
-            self.history = self.history  .. "\no" .. #self.input .. ": " .. Parser:text2greek(tostring(last_result)) .. "\n"
+            self.history = self.history  .. "\no" .. #self.input .. ": "
+                .. Parser:text2greek(tostring(last_result)) .. "\n"
         else
             self.history = input_text
             UIManager:show(InfoMessage:new{
@@ -403,9 +407,6 @@ function Calculator:getLatestVersion(url, timeout, maxtime)
     local ltn12 = require("ltn12")
     local socket = require("socket")
     local socketutil = require("socketutil")
-    local socket_url = require("socket.url")
-
-    local parsed = socket_url.parse(url)
 
     local sink = {}
     socketutil:set_timeout(timeout or 10, maxtime or 30)
