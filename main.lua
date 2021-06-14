@@ -290,10 +290,24 @@ function Calculator:insertBraces(str)
     return str
 end
 
-function Calculator:formatResult(val, format, round)
-    if val == nil then
-        return nil
+function Calculator:formatMantissaExponent(val, eng)
+	if val == 0 then return "" .. 0 end
+    local exp = math.floor(math.log10(math.abs(val)))
+    local mantissa = val / 10^exp
+    local shift_exp = 0
+    if eng then -- round exponent to multiples of 3
+        shift_exp = exp % 3
+        mantissa = mantissa * 10^shift_exp
     end
+    local ret = "" .. math.floor(mantissa * 10^self.round_places + 0.5)/(10^self.round_places)
+    if mantissa ~= 0 then
+        ret = ret .. "E" .. tostring(exp-shift_exp >= 0 and "+" or "") .. tostring(exp-shift_exp)
+    end
+    return ret
+end
+
+function Calculator:formatResult(val, format)
+    if val == nil then return nil end
 
     local ret = tostring(val)
     if format == "native" then -- lua native format
@@ -304,25 +318,32 @@ function Calculator:formatResult(val, format, round)
         return ret
     end
 
-    if format == "scientific" or format == "engineer" then
-        ret = string.format("%." .. round .. "E", val)
+	if not math.finite(val) then
+		return tostring(val)
+	end
+
+    if format == "scientific" then
+   		ret = self:formatMantissaExponent(val, false)
+    elseif format == "engineer" then
+   		ret = self:formatMantissaExponent(val, true)
     elseif format == "auto" or format == "programmer" then
-        if val == 0 then
-            return "" .. 0
-        elseif math.abs(val) >= 10^self.upper_bound or math.abs(val) <= 0.1^self.lower_bound then
-            ret = string.format("%." .. round .. "E", val)
+        if math.abs(val) >= 10^self.upper_bound or math.abs(val) <= 0.1^self.lower_bound then
+            ret = self:formatMantissaExponent(val, false)
         else
             ret = "" .. math.floor(val * 10^self.round_places + 0.5)/(10^self.round_places)
         end
     end
 
     -- tidy result
-    local repl
-    repeat -- remove e.g. 1.400e+04 -> 1.4e+04
-        ret, repl = ret:gsub("0E","E")
-    until (repl == 0)
-    ret = ret:gsub(".E","E") -- 1.E+04 -> 1E+04
+    if ret:find("%.") then
+        local repl
+        repeat -- remove e.g. 1.400e+04 -> 1.4e+04
+            ret, repl = ret:gsub("0E","E")
+        until (repl == 0)
+        ret = ret:gsub("%.E","E") -- 1.E+04 -> 1E+04
+    end
     ret = ret:gsub("E%+00$","") -- 1.2E+00 -> 1.2
+    ret = ret:gsub("E%+0$","") -- 1.2E+00 -> 1.2
 
     if format == "programmer" then
         local tmp = string.format("%016X", val)

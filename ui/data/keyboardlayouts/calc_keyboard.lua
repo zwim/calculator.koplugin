@@ -173,6 +173,10 @@ local calc_popup = {
         southeast = "/=",
         southwest = "*=",
     },
+    _dm = {
+        "/",
+        north = "%",
+    },
 }
 
 local _a_ = calc_popup._a_
@@ -204,6 +208,7 @@ local _z_ = calc_popup._z_
 
 local _eq = calc_popup._eq
 local _vl = calc_popup._vl
+local _dm = calc_popup._dm --div/modulo
 
 return {
     min_layer = 1,
@@ -233,7 +238,7 @@ return {
             { _g_,   "7",     " ",    " ", },
             { _h_,   "8",     " ",    " ", },
             { _j_,   "9",     "{",    ":", },
-            { _k_,   "/",     "}",    "<=", },
+            { _k_,   _dm,     "}",    "<=", },
             { _l_,   "^",     "_",    ">=", },
         },
         -- third row
@@ -253,7 +258,7 @@ return {
             { "+",   "rnd",   " ",    " ", },
             { "-",   "ln",    " ",    " ", },
             { "*",   "ld",    "&",    " ", },
-            { "/",   "log",   " ",    " ", },
+            { _dm,   "log",   " ",    " ", },
             { "^",   "1",     " ",    " ", },
             { "(",   "2",     " ",    ",", },
             { ")",   "3",     " ",    "↑", },
