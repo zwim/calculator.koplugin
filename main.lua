@@ -341,7 +341,7 @@ end
 function Calculator:calculate(input_text)
     local history_table = Util.splitToArray(self.history, "\n", false)
     local input_table =  Util.splitToArray(input_text, "\n", false)
-    local command_position = 1
+    local command_position
 
     -- search first difference between history and input
     for i = 1,#input_table do
@@ -355,6 +355,9 @@ function Calculator:calculate(input_text)
         new_command = Parser:greek2text(new_command)
         new_command = new_command:gsub("^[io][0-9]*: ","")  -- strip leading "ixxx: " or "oxxx: "
         new_command = self:insertBraces(new_command)
+        new_command = new_command:gsub("^[io][0-9]*: ","")  -- strip leading "ixxx: " or "oxxx: "
+        new_command = new_command:gsub("≥",">=")  -- strip leading "ixxx: " or "oxxx: "
+        new_command = new_command:gsub("≤","<=")  -- strip leading "ixxx: " or "oxxx: "
 
         local last_result, last_err = Parser:eval(new_command)
 
@@ -363,9 +366,9 @@ function Calculator:calculate(input_text)
         elseif last_result ~= nil and not last_err then
             self.input[#self.input + 1] = new_command
             -- last result is stored in "oxxx"
-            Parser:eval(Parser:parse("o" .. #self.input .. ":=" .. tostring(last_result)))
+            Parser:eval(Parser:parse("o" .. #self.input .. "=" .. tostring(last_result)))
             -- last result is stored in "ans"
-            Parser:eval(Parser:parse("ans:" .. tostring(last_result)))
+            Parser:eval(Parser:parse("ans=" .. tostring(last_result)))
             last_result = self:formatResult(last_result, self.number_format, self.round_places)
 
             if command_position ~= #input_table then  -- an old entry was changed
