@@ -79,7 +79,12 @@ The following operators are supported with increasing priority:
     "?:" ternary like in C
     "&&" logical and, the lua way
     "||" logical or, the lua way
-    "!&" logical nand, the lua way
+    "##" logical nand, the lua way, -> logical not
+    "~~" logical nand, the lua way
+    "&"  bitwise and
+    "|"  bitwise or
+    "#"  bitwise nand -> bitwise not
+    "~"  bitwise nand
     "<="
     "=="
     ">="
