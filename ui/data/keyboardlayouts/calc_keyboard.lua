@@ -177,6 +177,33 @@ local calc_popup = {
         "/",
         north = "%",
     },
+    _facTer = {
+        "!",
+        northeast = "?",
+        east = ":",
+    },
+    _ml = {
+        "*",
+        northeast = "&",
+        east = "&&",
+        northwest = "#",
+        west = "##",
+    },
+    _al = {
+        "+",
+        northeast = "|",
+        east = "||",
+    },
+    _sl = {
+        "-",
+        northeast = "~",
+        east = "~~",
+    },
+    _Sl = {
+        "‒",
+        northeast = "~",
+        east = "~~",
+    },
 }
 
 local _a_ = calc_popup._a_
@@ -209,6 +236,11 @@ local _z_ = calc_popup._z_
 local _eq = calc_popup._eq
 local _vl = calc_popup._vl
 local _dm = calc_popup._dm --div/modulo
+local _facTer = calc_popup._facTer --factorial, ternary
+local _ml = calc_popup._ml --mul/and/nand
+local _al = calc_popup._al --add/or
+local _sl = calc_popup._sl --sub/xor
+local _Sl = calc_popup._Sl --sub/xor
 
 return {
     min_layer = 1,
@@ -219,7 +251,7 @@ return {
     keys = {
         -- first row
         {  --  1      2        3       4
-            { _q_,   "!",     " ",    "+=", },
+            { _q_,   _facTer,     " ",    "+=", },
             { _w_,   "x",     " ",    "-?", },
             { _e_,   "y",     " ",    "*=", },
             { _r_,   "z",     " ",    "/=", },
@@ -250,19 +282,19 @@ return {
             { _b_,   "4",     " ",    " ", },
             { _n_,   "5",     ">",   " ", },
             { _m_,   "6",     " ",    " ", },
-            { " ",   "*",     " ",    "!=", },
+            { "_",   _ml,     " ",    "!=", },
             { _p_,   "√",     " ",    "==", },
         },
         -- fourth row
         {  --  1      2        3       4
-            { "+",   "rnd",   " ",    " ", },
-            { "-",   "ln",    " ",    " ", },
-            { "*",   "ld",    "&",    " ", },
+            { _al,   "rnd",   " ",    " ", },
+            { _sl,   "ln",    " ",    " ", },
+            { _ml,   "ld",    "&",    " ", },
             { _dm,   "log",   " ",    " ", },
             { "^",   "1",     " ",    " ", },
             { "(",   "2",     " ",    ",", },
             { ")",   "3",     " ",    "↑", },
-            { "ans",   "‒",     " ",    ":=", },
+            { "ans", _Sl,     " ",    ":=", },
             { label = "",  width = 1.0, bold = false  },  --delete
 
         },
@@ -274,8 +306,8 @@ return {
             { " ",    "ans",  " ",    " ", },
             { " ",    "0",    " ",    " ", },
             { " ",    ".",    " ",    "←", },
-            { " ",    "-",    " ",    "↓", },
-            { " ",    "+",    " ",    "→", },
+            { " ",    _sl,    " ",    "↓", },
+            { " ",    _al,    " ",    "→", },
             { label = "⮠",
               "\n",   "\n",   "\n",   "\n",
               width = 1.0,
