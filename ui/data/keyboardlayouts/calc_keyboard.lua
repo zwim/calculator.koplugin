@@ -32,6 +32,7 @@ local calc_popup = {
         north = "E",
         northeast = "epsilon",
         east = "ε",
+        west = "exp"
     },
    _f_ = {
         "f",
@@ -275,7 +276,7 @@ return {
         },
         -- third row
         {  --  1      2        3       4
-            { _y_,   "e",     " ",    " ", },
+            { _y_,   _e_,     " ",    " ", },
             { _x_,   "asin",  " ",    " ", },
             { _c_,   "acos",  "↑",    " ", },
             { _v_,   "atan",  " ",    " ", },

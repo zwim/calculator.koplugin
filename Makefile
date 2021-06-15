@@ -1,5 +1,8 @@
 VERSION=$(shell grep Version: VERSION | sed 's/Version: //g')
 
+
+all: test clean zip
+
 test:
 	cd formulaparser && lua parser-test.lua && cd ..
 
@@ -28,4 +31,3 @@ zip: clean
 		../calculator.koplugin-$(VERSION).zip *
 	
 
-all: test clean zip
