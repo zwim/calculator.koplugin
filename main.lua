@@ -169,6 +169,7 @@ or type 'help()⮠']])
             is_enter_default = true,
             callback = function()
                 Trapper:wrap(function()
+                    self.input_dialog._input_widget:addChars(" ")
                     self:calculate(self.input_dialog:getInputText())
                 end)
                 self.input_dialog:setInputText(self.history)
@@ -214,11 +215,12 @@ or type 'help()⮠']])
             },
         }},
         enter_callback = function()
-                Trapper:wrap(function()
-                    self:calculate(self.input_dialog:getInputText())
-                end)
-                self.input_dialog:setInputText(self.history)
-                self:gotoEnd()
+            Trapper:wrap(function()
+                self.input_dialog._input_widget:addChars(" ")
+                self:calculate(self.input_dialog:getInputText())
+            end)
+            self.input_dialog:setInputText(self.history)
+            self:gotoEnd()
         end,
         -- Set/save view and cursor position callback
         view_pos_callback = function(top_line_num, charpos)
@@ -318,9 +320,9 @@ function Calculator:formatResult(val, format)
         return ret
     end
 
-	if not math.finite(val) then
-		return tostring(val)
-	end
+    if not math.finite(val) then
+        return tostring(val)
+    end
 
     if format == "scientific" then
    		ret = self:formatMantissaExponent(val, false)
@@ -371,8 +373,13 @@ function Calculator:calculate(input_text)
             break
         end
     end
+    if command_position and input_table[command_position] == " " then
+        return
+    end
     if command_position and input_table[command_position] then
         local new_command = input_table[command_position]
+        new_command = new_command:gsub("^ *","")
+        new_command = new_command:gsub(" *$","")
         new_command = Parser:greek2text(new_command)
         new_command = new_command:gsub("^[io][0-9]*: ","")  -- strip leading "ixxx: " or "oxxx: "
         new_command = self:insertBraces(new_command)
@@ -411,6 +418,7 @@ function Calculator:calculate(input_text)
                 text = last_err or _("Input error"),
                 })
         end
+        self.history = self.history:gsub("\n\n","\n")
     end
 end
 
