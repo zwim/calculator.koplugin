@@ -79,12 +79,21 @@ function CalculatorSettingsDialog:init()
         })
     end
 
-    local radio_buttons_round = {}
+    local radio_buttons_significant = {}
     for i = 0,10 do
-        table.insert(radio_buttons_round, {
+        table.insert(radio_buttons_significant, {
             {
             text = i,
-            checked = self.parent.round_places == i,
+            checked = self.parent.significant_places == i,
+            provider = i,
+            },
+        })
+    end
+    for i = 12,16,2 do
+        table.insert(radio_buttons_significant, {
+            {
+            text = i,
+            checked = self.parent.significant_places == i,
             provider = i,
             },
         })
@@ -123,10 +132,10 @@ function CalculatorSettingsDialog:init()
                     self.parent.status_line = self.parent:getStatusLine()
                 end
 
-                local new_round = self.parent.settings_dialog.radio_button_table_round.checked_button.provider
-                if new_round ~= self.parent.round_places then
-                    self.parent.round_places = new_round
-                    G_reader_settings:saveSetting("calculator_round_places", new_round)
+                local new_significant = self.parent.settings_dialog.radio_button_table_significant.checked_button.provider
+                if new_significant ~= self.parent.significant_places then
+                    self.parent.significant_places = new_significant
+                    G_reader_settings:saveSetting("calculator_significant_places", new_significant)
                     self.parent.status_line = self.parent:getStatusLine()
                 end
 
@@ -154,8 +163,8 @@ function CalculatorSettingsDialog:init()
         face = self.face,
     }
 
-    self.radio_button_table_round = RadioButtonTable:new{
-        radio_buttons = radio_buttons_round,
+    self.radio_button_table_significant = RadioButtonTable:new{
+        radio_buttons = radio_buttons_significant,
         width = math.floor(self.width * 0.4),
         focused = true,
         scroll = false,
@@ -186,7 +195,7 @@ function CalculatorSettingsDialog:init()
             HorizontalGroup:new{
                     dimen = Geom:new{
                     w = self.title_bar:getSize().w,
-                    h = self.radio_button_table_round:getSize().h,
+                    h = self.radio_button_table_significant:getSize().h,
                 },
                 VerticalGroup:new{ -- angle and format
                     align = "center",
@@ -216,20 +225,20 @@ function CalculatorSettingsDialog:init()
                     },
                 },
                 HorizontalSpan:new{width=self.title_bar:getSize().w * 0.1},
-                VerticalGroup:new{ -- rounding
+                VerticalGroup:new{ -- significance
                     align = "center",
-                    -- round
+                    -- significant
                     TextWidget:new{
-                        text = _("Rounding ≈"),
+                        text = _("Significance ≈"),
                         face =  self.text_face,
                     },
 
                     CenterContainer:new{
                         dimen = Geom:new{
                             w = self.title_bar:getSize().w * 0.4,
-                            h = self.radio_button_table_round:getSize().h,
+                            h = self.radio_button_table_significant:getSize().h,
                         },
-                        self.radio_button_table_round,
+                        self.radio_button_table_significant,
                     },
                 },
             },

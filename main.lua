@@ -51,8 +51,8 @@ local Calculator = WidgetContainer:new{
             {"programmer", _("Programmer")},
             {"native", _("Native")},
         },
-    round_places = 5, -- decimal places
-    lower_bound = 5, -- switch to scientific if <=10^lower_bound
+    significant_places = 5, -- decimal places
+    lower_bound = 4, -- switch to scientific if <=10^lower_bound
     upper_bound = 6 -- switch to scientific if >=10^upper_bound
 }
 
@@ -112,13 +112,13 @@ function Calculator:getStatusLine()
     local format = self:getString(self.number_format, self.number_formats)
     format = format .. (" "):rep(12-#format)
     return string.format(_("∡ %s      Format: %s      ≈%d"),
-        angle_mode, format, self.round_places)
+        angle_mode, format, self.significant_places)
 end
 
 function Calculator:onCalculatorStart()
     self.angle_mode = G_reader_settings:readSetting("calculator_angle_mode") or self.angle_mode
     self.number_format = G_reader_settings:readSetting("calculator_number_format") or self.number_format
-    self.round_places = G_reader_settings:readSetting("calculator_round_places") or self.round_places
+    self.significant_places = G_reader_settings:readSetting("calculator_significant_places") or self.significant_places
 
     self:addKeyboard()
 
@@ -274,16 +274,16 @@ end
 
 function Calculator:insertBraces(str)
     local function_names={"exp", "sin", "cos", "tan", "asin", "acos", "atan", "ln", "ld", "log",
-        "sqrt", "√", "rnd", "floor", "showvars"}
+        "sqrt", "√", "rnd", "floor", "showvars", "help"}
     str = str:gsub("EE","E")
     for _, func in pairs(function_names) do
         local _, pos = str:find("^" .. func .. "[^(%a]")
         if not pos then
-            _, pos = str:find("[^%a^_]" .. func .. "[^(%a]")
+            _, pos = str:find("[%p%d]" .. func .. "[^(%a]")
         end
         while pos do
             str = str:sub(1, pos-1) .. "(" .. str:sub(pos)
-            _, pos = str:find("[^%a^_]" .. func .. "[^(%a]")
+            _, pos = str:find("[%p%d]" .. func .. "[^(%a]")
         end
     end
     local _, count_opening = str:gsub("%(", "")
@@ -303,7 +303,7 @@ function Calculator:formatMantissaExponent(val, eng)
         shift_exp = exp % 3
         mantissa = mantissa * 10^shift_exp
     end
-    local ret = "" .. math.floor(mantissa * 10^self.round_places + 0.5)/(10^self.round_places)
+    local ret = "" .. math.floor(mantissa * 10^(self.round_places-1) + 0.5)/(10^(self.round_places-1))
     if mantissa ~= 0 then
         ret = ret .. "E" .. tostring(exp-shift_exp >= 0 and "+" or "") .. tostring(exp-shift_exp)
     end
@@ -334,7 +334,12 @@ function Calculator:formatResult(val, format)
         if math.abs(val) >= 10^self.upper_bound or math.abs(val) <= 0.1^self.lower_bound then
             ret = self:formatMantissaExponent(val, false)
         else
-            ret = "" .. math.floor(val * 10^self.round_places + 0.5)/(10^self.round_places)
+            local msb = math.floor(math.log10(val)) -- most significant place
+            if val >= 1 then
+                msb = 0
+            end
+            ret = "" .. string.format("%." .. self.significant_places-msb-1 .."f",
+                math.floor(val * 10^(self.significant_places-msb-1)+0.5)/10^(self.significant_places-msb-1))
         end
     end
 
@@ -399,7 +404,7 @@ function Calculator:calculate(input_text)
             Parser:eval(Parser:parse("o" .. #self.input .. "=" .. tostring(last_result)))
             -- last result is stored in "ans"
             Parser:eval(Parser:parse("ans=" .. tostring(last_result)))
-            last_result = self:formatResult(last_result, self.number_format, self.round_places)
+            last_result = self:formatResult(last_result, self.number_format, self.significant_places)
 
             if command_position ~= #input_table then  -- an old entry was changed
                 self.history = input_text .. "\ni" .. #self.input .. ": " .. new_command
