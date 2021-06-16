@@ -303,7 +303,7 @@ function Calculator:formatMantissaExponent(val, eng)
         shift_exp = exp % 3
         mantissa = mantissa * 10^shift_exp
     end
-    local ret = "" .. math.floor(mantissa * 10^(self.round_places-1) + 0.5)/(10^(self.round_places-1))
+    local ret = "" .. math.floor(mantissa * 10^(self.significant_places-1) + 0.5)/(10^(self.significant_places-1))
     if mantissa ~= 0 then
         ret = ret .. "E" .. tostring(exp-shift_exp >= 0 and "+" or "") .. tostring(exp-shift_exp)
     end
@@ -338,8 +338,7 @@ function Calculator:formatResult(val, format)
             if val >= 1 then
                 msb = 0
             end
-            ret = "" .. string.format("%." .. self.significant_places-msb-1 .."f",
-                math.floor(val * 10^(self.significant_places-msb-1)+0.5)/10^(self.significant_places-msb-1))
+            ret = "" .. math.floor(val * 10^(self.significant_places-msb-1)+0.5)/10^(self.significant_places-msb-1)
         end
     end
 
