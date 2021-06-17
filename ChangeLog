@@ -10,6 +10,7 @@ Version: 0.9.2
   Alphabetically sorting of variables
   Added Engineering mode (Exponentials multiply of three)
   Better presentation of results (rounding, trimming)
+  Changed rounding to significant places
 
 
 Version: 0.9.1
