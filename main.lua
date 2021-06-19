@@ -7,12 +7,13 @@ local Dispatcher = require("dispatcher")
 local Font = require("ui/font")
 local InfoMessage = require("ui/widget/infomessage")
 local InputDialog = require("ui/widget/inputdialog")
---local TextViewer = require("ui/widget/textviewer")
+local MultiConfirmBox = require("ui/widget/multiconfirmbox")
 local Trapper = require("ui/trapper")
 local UIManager = require("ui/uimanager")
 local Util = require("util")
 local VirtualKeyboard = require("ui/widget/virtualkeyboard")
 local WidgetContainer = require("ui/widget/container/widgetcontainer")
+local T = require("ffi/util").template
 local lfs = require("libs/libkoreader-lfs")
 local logger = require("logger")
 local util = require("ffi/util")
@@ -32,8 +33,13 @@ local LATEST_VERSION = "https://raw.githubusercontent.com/zwim/calculator.koplug
 local Calculator = WidgetContainer:new{
     name = "calculator",
     is_doc_only = false,
-    dump_file = util.realpath(DataStorage:getDataDir()) .. "/output.calc",
-    init_file = util.realpath(DataStorage:getDataDir()) .. "/init.calc",
+    calculator_output_path = G_reader_settings:readSetting("calculator_output_path") or
+		util.realpath(DataStorage:getDataDir()) .. "/output.calc",
+    calculator_input_path = G_reader_settings:readSetting("calculator_output_path") or
+		util.realpath(DataStorage:getDataDir()) .. "/input.calc",
+    init_file = util.realpath(DataStorage:getDataDir()) .. "/plugins/calculator.koplugin/init.calc",
+	use_init_file = G_reader_settings:readSetting("calculator_use_init_file") or "yes",
+    load_file = G_reader_settings:readSetting("calculator_input_path") or util.realpath(DataStorage:getDataDir()) .. "/init.calc",
     history = "",
     i_num = 1, -- number of next input
     input = {},
@@ -57,6 +63,13 @@ local Calculator = WidgetContainer:new{
 }
 
 function Calculator:init()
+	G_reader_settings:saveSetting("calculator_output_path", self.output_path)
+	G_reader_settings:saveSetting("calculator_input_path", self.input_path)
+	G_reader_settings:saveSetting("calculator_input_path", self.input_path)
+	G_reader_settings:saveSetting("calculator_use_init_file", self.use_init_file)
+	if self.use_init_file == "yes" then
+		self:load(nil, self.init_file)
+	end
     self:onDispatcherRegisterActions()
     self.ui.menu:registerToMainMenu(self)
 end
@@ -178,9 +191,12 @@ or type 'help()⮠']])
             end,
             },
             {
-            text = "⎚",
+            text = "⎚", --clear
             callback = function()
                 Parser:eval("kill()")
+				if self.use_init_file == "yes" then
+					self:load(nil, self.init_file)
+				end
                 self.history = ""
                 self.input = {}
                 self.input_dialog:setInputText("")
@@ -188,14 +204,38 @@ or type 'help()⮠']])
             },
             {
             text = "⇧",
-            callback = function()
-                self:load(self.init_file)
+            callback = function(touchmenu_instance)
+				UIManager:show(MultiConfirmBox:new{
+					text = T( _("Use file %1"), self.calculator_input_path),
+					cancel_text = "✕", --cancel
+					choice1_text = _("Select"),
+					choice1_callback = function()
+						UIManager:close(self.input_dialog)
+						CalculatorSettingsDialog.choosePathFile(self, touchmenu_instance, "calculator_input_path", false, true, self.load)
+					end,
+					choice2_text = "✓", --ok
+					choice2_callback = function()
+						self:dump(nil, self.calculator_input_path)
+					end,
+				})
             end,
             },
             {
             text = "⇩",
-            callback = function()
-                self:dump(self.dump_file)
+            callback = function(touchmenu_instance)
+				UIManager:show(MultiConfirmBox:new{
+					text = T( _("Use file %1"), self.calculator_output_path),
+					cancel_text = "✕", --cancel
+					choice1_text = _("Select"),
+					choice1_callback = function()
+						UIManager:close(self.input_dialog)
+						CalculatorSettingsDialog.choosePathFile(self, touchmenu_instance, "calculator_output_path", false, true, self.dump)
+					end,
+					choice2_text = "✓", --ok
+					choice2_callback = function()
+						self:dump(nil, self.calculator_output_path)
+					end,
+				})
             end,
             },
             {
@@ -208,7 +248,7 @@ or type 'help()⮠']])
             end,
             },
             {
-            text = "✕",
+            text = "✕", --cancel
             callback = function()
                 self:restoreKeyboard()
                 UIManager:close(self.input_dialog)
@@ -243,7 +283,7 @@ or type 'help()⮠']])
     self.input_dialog:onShowKeyboard(true)
 end
 
-function Calculator:load(file_name)
+function Calculator:load(old_file, file_name)
     local file = io.open(file_name, "r")
     if file then
         local line = file:read()
@@ -255,11 +295,16 @@ function Calculator:load(file_name)
     else
         logger.warn("Failed to load file from " ..file_name )
     end
+	if old_file then
+		self:onCalculatorStart()
+	end
 end
 
-function Calculator:dump(file_name)
+function Calculator:dump(old_file, file_name)
+	print("xxxxxxxxxxxxxx file" .. file_name)
     local file = io.open(file_name, "w")
     if file then
+		print("xxxxxxxxxxxxxx anz" .. #self.input)
         for i = 1, #self.input do
             if self.input[i] then
                 file:write("/*i" .. i .. ":*/ " .. self.input[i] .. "\n")
@@ -270,6 +315,9 @@ function Calculator:dump(file_name)
     else
         logger.warn("Failed to dump calculator output to " .. file_name)
     end
+	if old_file then
+		self:onCalculatorStart()
+	end
 end
 
 function Calculator:insertBraces(str)
