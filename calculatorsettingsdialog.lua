@@ -11,7 +11,9 @@ local Geom = require("ui/geometry")
 local HorizontalGroup = require("ui/widget/horizontalgroup")
 local HorizontalSpan = require("ui/widget/horizontalspan")
 local InputContainer = require("ui/widget/container/inputcontainer")
+local InputDialog = require("ui/widget/inputdialog")
 local LineWidget = require("ui/widget/linewidget")
+local PathChooser = require("ui/widget/pathchooser")
 local RadioButtonTable = require("ui/widget/radiobuttontable")
 local Size = require("ui/size")
 local TextWidget = require("ui/widget/textwidget")
@@ -20,6 +22,8 @@ local VerticalGroup = require("ui/widget/verticalgroup")
 local VerticalSpan = require("ui/widget/verticalspan")
 local _ = require("gettext")
 local Screen = require("device").screen
+local lfs = require("libs/libkoreader-lfs")
+local util = require("util")
 
 local Parser = require("formulaparser/formulaparser")
 
@@ -79,12 +83,37 @@ function CalculatorSettingsDialog:init()
         })
     end
 
-    local radio_buttons_round = {}
+    local radio_buttons_init = {}
+    table.insert(radio_buttons_init, {
+        {
+        text = "yes",
+        checked = self.parent.use_init_file == "yes",
+        provider = "yes",
+        },
+    })
+    table.insert(radio_buttons_init, {
+        {
+        text = "no",
+        checked = self.parent.use_init_file == "no",
+        provider = "no",
+        },
+    })
+
+    local radio_buttons_significant = {}
     for i = 0,10 do
-        table.insert(radio_buttons_round, {
+        table.insert(radio_buttons_significant, {
             {
             text = i,
-            checked = self.parent.round_places == i,
+            checked = self.parent.significant_places == i,
+            provider = i,
+            },
+        })
+    end
+    for i = 12,16,2 do
+        table.insert(radio_buttons_significant, {
+            {
+            text = i,
+            checked = self.parent.significant_places == i,
             provider = i,
             },
         })
@@ -92,13 +121,13 @@ function CalculatorSettingsDialog:init()
 
     table.insert(buttons, {
         {
-            text = _("Cancel"),
+            text = "✕", --close
             callback = function()
                 UIManager:close(self.parent.settings_dialog)
             end,
         },
         {
-            text = _("Save"),
+            text ="✓", --ok
             is_enter_default = true,
             callback = function()
                 UIManager:close(self.parent.settings_dialog)
@@ -123,11 +152,17 @@ function CalculatorSettingsDialog:init()
                     self.parent.status_line = self.parent:getStatusLine()
                 end
 
-                local new_round = self.parent.settings_dialog.radio_button_table_round.checked_button.provider
-                if new_round ~= self.parent.round_places then
-                    self.parent.round_places = new_round
-                    G_reader_settings:saveSetting("calculator_round_places", new_round)
+                local new_significant = self.parent.settings_dialog.radio_button_table_significant.checked_button.provider
+                if new_significant ~= self.parent.significant_places then
+                    self.parent.significant_places = new_significant
+                    G_reader_settings:saveSetting("calculator_significant_places", new_significant)
                     self.parent.status_line = self.parent:getStatusLine()
+                end
+
+                local new_init_file = self.parent.settings_dialog.radio_button_table_init.checked_button.provider
+                if new_init_file ~= self.parent.use_init_file then
+                    self.parent.use_init_file = new_init_file
+                    G_reader_settings:saveSetting("calculator_use_init_file", new_init_file)
                 end
 
                 UIManager:close(self.parent.input_dialog)
@@ -154,8 +189,17 @@ function CalculatorSettingsDialog:init()
         face = self.face,
     }
 
-    self.radio_button_table_round = RadioButtonTable:new{
-        radio_buttons = radio_buttons_round,
+    self.radio_button_table_init = RadioButtonTable:new{
+        radio_buttons = radio_buttons_init,
+        width = math.floor(self.width * 0.4),
+        focused = true,
+        scroll = false,
+        parent = self,
+        face = self.face,
+    }
+
+    self.radio_button_table_significant = RadioButtonTable:new{
+        radio_buttons = radio_buttons_significant,
         width = math.floor(self.width * 0.4),
         focused = true,
         scroll = false,
@@ -186,7 +230,7 @@ function CalculatorSettingsDialog:init()
             HorizontalGroup:new{
                     dimen = Geom:new{
                     w = self.title_bar:getSize().w,
-                    h = self.radio_button_table_round:getSize().h,
+                    h = self.radio_button_table_significant:getSize().h,
                 },
                 VerticalGroup:new{ -- angle and format
                     align = "center",
@@ -202,7 +246,7 @@ function CalculatorSettingsDialog:init()
                         },
                         self.radio_button_table_angle,
                     },
-                    VerticalSpan:new{width = Size.span.vertical_large*6},
+                    VerticalSpan:new{width = Size.span.vertical_large*4},
                     TextWidget:new{
                         text = _("Number format"),
                         face =  self.text_face,
@@ -214,22 +258,34 @@ function CalculatorSettingsDialog:init()
                         },
                         self.radio_button_table_format,
                     },
+                    VerticalSpan:new{width = Size.span.vertical_large*4},
+                    TextWidget:new{
+                        text = _("Autoload\ninit.calc"),
+                        face =  self.text_face,
+                    },
+                    CenterContainer:new{
+                        dimen = Geom:new{
+                            w = self.title_bar:getSize().w * 0.4,
+                            h = self.radio_button_table_init:getSize().h,
+                        },
+                        self.radio_button_table_init,
+                    },
                 },
                 HorizontalSpan:new{width=self.title_bar:getSize().w * 0.1},
-                VerticalGroup:new{ -- rounding
+                VerticalGroup:new{ -- significance
                     align = "center",
-                    -- round
+                    -- significant
                     TextWidget:new{
-                        text = _("Rounding ≈"),
+                        text = _("Significance ≈"),
                         face =  self.text_face,
                     },
 
                     CenterContainer:new{
                         dimen = Geom:new{
                             w = self.title_bar:getSize().w * 0.4,
-                            h = self.radio_button_table_round:getSize().h,
+                            h = self.radio_button_table_significant:getSize().h,
                         },
-                        self.radio_button_table_round,
+                        self.radio_button_table_significant,
                     },
                 },
             },
@@ -265,6 +321,85 @@ function CalculatorSettingsDialog:onCloseWidget()
     UIManager:setDirty(nil, function()
         return "ui", self[1][1].dimen
     end)
+end
+
+
+--[[--
+chooses a path or (an existing) file (borrowed from coverimage)
+
+@touchmenu_instance for updating of the menu
+@string key is the G_reader_setting key which is used and changed
+@boolean folder_only just selects a path, no file handling
+@boolean new_file allows to enter a new filename, or use just an existing file
+@function migrate(a,b) callback to a function to mangle old folder/file with new folder/file.
+    Can be used for migrating the contents of the old path to the new one
+]]
+function CalculatorSettingsDialog:choosePathFile(touchmenu_instance, key, folder_only, new_file, migrate)
+    local old_path, dummy = util.splitFilePathName(self[key])
+    UIManager:show(PathChooser:new{
+        select_directory = folder_only or new_file,
+        select_file = not folder_only,
+        height = Screen:getHeight(),
+        path = old_path,
+        onConfirm = function(dir_path)
+            local mode = lfs.attributes(dir_path, "mode")
+            if folder_only then -- just select a folder
+                if not dir_path:find("/$") then
+                    dir_path = dir_path .. "/"
+                end
+                if migrate then
+                    migrate(self, self[key], dir_path)
+                end
+                self[key] = dir_path
+                G_reader_settings:saveSetting(key, dir_path)
+                if touchmenu_instance then
+                    touchmenu_instance:updateItems()
+                end
+            elseif new_file and mode == "directory" then -- new filename should be entered or a file could be selected
+                local file_input
+                file_input = InputDialog:new{
+                    title =  _("Append filename"),
+                    input = dir_path .. "/",
+                    buttons = {{
+                        {
+                            text = _("Cancel"),
+                            callback = function()
+                                UIManager:close(file_input)
+                            end,
+                        },
+                        {
+                            text = _("Save"),
+                            callback = function()
+                                local file = file_input:getInputText()
+                                print("xxxxxxxx " .. tostring(key) .. " " .. tostring(self[key]))
+                                if migrate and self[key] and self[key] ~= "" then
+                                    print("xxxxxxxxxxxxxxxx migrate")
+                                    migrate(self, self[key], file)
+                                end
+                                self[key] = file
+                                G_reader_settings:saveSetting(key, file)
+                                if touchmenu_instance then
+                                    touchmenu_instance:updateItems()
+                                end
+                                UIManager:close(file_input)
+                            end,
+                        },
+                    }},
+                }
+                UIManager:show(file_input)
+                file_input:onShowKeyboard()
+            elseif mode == "file" then   -- just select an existing file
+                if migrate then
+                    migrate(self, self[key], dir_path)
+                end
+                self[key] = dir_path
+                G_reader_settings:saveSetting(key, dir_path)
+                if touchmenu_instance then
+                    touchmenu_instance:updateItems()
+                end
+            end
+        end,
+    })
 end
 
 return CalculatorSettingsDialog

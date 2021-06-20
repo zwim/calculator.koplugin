@@ -32,6 +32,7 @@ local calc_popup = {
         north = "E",
         northeast = "epsilon",
         east = "ε",
+        west = "exp"
     },
    _f_ = {
         "f",
@@ -139,7 +140,7 @@ local calc_popup = {
         "x",
         north = "X",
         northeast = "xi",
-        east = "x",
+        east = "ξ",
     },
    _y_ = {
         "y",
@@ -152,26 +153,76 @@ local calc_popup = {
         east = "ζ",
     },
     _eq = {
-        "=",
+        "==",
         north = "!=",
         northeast = ">",
         northwest = "<",
         east = ">=",
         west = "<=",
-        south = "==",
-        southeast = "≥xxx",
-        southwest = "≤xxx",
+        south = " ",
+        southeast = "≥",
+        southwest = "≤",
     },
     _vl = {
-        ":=",
-        north = "=",
+        "=",
+        north = ":=",
         northeast = "-=",
         northwest = "+=",
-        east = "",
-        west = "",
+        east = " ",
+        west = " ",
         south = "%=",
         southeast = "/=",
         southwest = "*=",
+    },
+    _dm = {
+        "/",
+        north = "%",
+    },
+    _facTer = {
+        "!",
+        northeast = "?",
+        east = ":",
+    },
+    _ml = {
+        "*",
+        northeast = "&",
+        east = "&&",
+        northwest = "#",
+        west = "##",
+    },
+    _al = {
+        "+",
+        northeast = "|",
+        east = "||",
+    },
+    _sl = {
+        "-",
+        northeast = "~",
+        east = "~~",
+    },
+    _Sl = {
+        "‒",
+        northeast = "~",
+        east = "~~",
+    },
+    _vx = {
+        "x",
+        northwest = "s",
+        north = "t",
+        northeast = "u",
+        east = "v",
+        southeast = "ω",
+        south = "α",
+        southwest = " ",
+        west = "l",
+    },
+    _vy = {
+        "y",
+    },
+    _vz = {
+        "z",
+        east = "o",
+        west = "i",
     },
 }
 
@@ -204,73 +255,82 @@ local _z_ = calc_popup._z_
 
 local _eq = calc_popup._eq
 local _vl = calc_popup._vl
+local _dm = calc_popup._dm --div/modulo
+local _facTer = calc_popup._facTer --factorial, ternary
+local _ml = calc_popup._ml --mul/and/nand
+local _al = calc_popup._al --add/or
+local _sl = calc_popup._sl --sub/xor
+local _Sl = calc_popup._Sl --sub/xor
+local _vx = calc_popup._vx --variables
+local _vy = calc_popup._vy --variables
+local _vz = calc_popup._vz --variables
 
 return {
     min_layer = 1,
     max_layer = 4,
-    shiftmode_keys = {[""] = true, ["1/2"] = true, ["2/2"] = true,},
-    symbolmode_keys = {["Sym"] = true, ["ABC"] = true},
+    shiftmode_keys = {[""] = true, ["Var"] = true, ["+-*/"] = true,},
+    symbolmode_keys = {["OP"] = true, ["Calc"] = true},
     utf8mode_keys = {["🌐"] = true},
     keys = {
         -- first row
         {  --  1      2        3       4
-            { _q_,   "!",     "",    "+=", },
-            { _w_,   "x",     "",    "-?", },
-            { _e_,   "y",     "",    "*=", },
-            { _r_,   "z",     "",    "/=", },
-            { _t_,   "EE",    "",    "<<", },
-            { _z_,   "(",     "",    ">>", },
+            { _q_,   _facTer,     " ",    "+=", },
+            { _w_,   _vx,     " ",    "-?", },
+            { _e_,   _vy,     " ",    "*=", },
+            { _r_,   _vz,     " ",    "/=", },
+            { _t_,   "EE",    " ",    "<<", },
+            { _z_,   "(",     " ",    ">>", },
             { _u_,   ")",     "|",   "?", },
-            { _i_,   _eq,     "?",    "<", },
-            { _o_,   _vl,     "",    ">", },
+            { _i_,   _vl,     "?",    "<", },
+            { _o_,   _eq,     " ",    ">", },
         },
         -- second row
         {  --  1      2        3       4
-            { _a_,   "π",     "",    "||", },
-            { _s_,   "sin",   "",    "&&", },
-            { _d_,   "cos",   "",    "!&", },
-            { _f_,   "tan",   "",    "", },
-            { _g_,   "7",     "",    "", },
-            { _h_,   "8",     "",    "", },
+            { _a_,   "π",     " ",    "||", },
+            { _s_,   "sin",   " ",    "&&", },
+            { _d_,   "cos",   " ",    "!&", },
+            { _f_,   "tan",   " ",    " ", },
+            { _g_,   "7",     " ",    " ", },
+            { _h_,   "8",     " ",    " ", },
             { _j_,   "9",     "{",    ":", },
-            { _k_,   "/",     "}",    "<=", },
+            { _k_,   _dm,     "}",    "<=", },
             { _l_,   "^",     "_",    ">=", },
         },
         -- third row
         {  --  1      2        3       4
-            { _y_,   "e",     " ",    " ", },
+            { _y_,   _e_,     " ",    " ", },
             { _x_,   "asin",  " ",    " ", },
-            { _c_,   "acos",  "↑",    "", },
-            { _v_,   "atan",  "",    "", },
-            { _b_,   "4",     "",    "", },
-            { _n_,   "5",     ">",   "", },
-            { _m_,   "6",     "",    "", },
-            { _p_,   "*",     "",    "!=", },
-            { "α",   "√",     "",    "==", },
+            { _c_,   "acos",  " ",    " ", },
+            { _v_,   "atan",  " ",    " ", },
+            { _b_,   "4",     " ",    " ", },
+            { _n_,   "5",     " ",    " ", },
+            { _m_,   "6",     " ",    " ", },
+            { "_",   _ml,     " ",    "!=", },
+            { _p_,   "√",     " ",    "==", },
         },
         -- fourth row
         {  --  1      2        3       4
-            { "β",   "rnd",   " ",    " ", },
-            { "γ",   "ln",    " ",    " ", },
-            { "δ",   "ld",    "&",    "", },
-            { "ε",   "log",   "",    "", },
-            { "η",   "1",     "",    "", },
-            { "λ",   "2",     "",    ",", },
-            { "μ",   "3",     "",    "↑", },
-            { "ν",   "‒",     "",    ":=", },
+            { _al,   "rnd",   " ",    " ", },
+            { _sl,   "ln",    " ",    " ", },
+            { _ml,   "ld",    "&",    " ", },
+            { _dm,   "log",   " ",    " ", },
+            { "^",   "1",     " ",    " ", },
+            { "(",   "2",     " ",    ",", },
+            { ")",   "3",     " ",    "↑", },
+            { "ans", _Sl,     " ",    ":=", },
             { label = "",  width = 1.0, bold = false  },  --delete
 
         },
         -- fifth row
         { --  1      2        3       4
-            {"2/2",   "1/2",  "2/2",  "1/2",},
-            { "Sym",  "Sym",  "ABC",  "ABC", },
+            {"+-*/",   "Var",  "+-*/",  "Var", bold = true, },
+            { "OP",  "OP",  "Calc",  "Calc", bold = true,},
             { label = "🌐", },
-            { "σ",    "ans",  "",    " ", },
-            { "φ",    "0",    "",    " ", },
-            { "τ",    ".",    "",    "←", },
-            { "ω",    "-",    "",    "↓", },
-            { "ψ",    "+",    "",    "→", },
+            { " ",    "ans",  " ",    " ", },
+            { " ",    "0",    " ",    " ", },
+            { " ",    ".",    " ",    "←", },
+            { " ",    _sl,    " ",    "↓", },
+            { _vl,    _al,    " ",    "→", },
             { label = "⮠",
               "\n",   "\n",   "\n",   "\n",
               width = 1.0,
