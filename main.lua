@@ -7,12 +7,13 @@ local Dispatcher = require("dispatcher")
 local Font = require("ui/font")
 local InfoMessage = require("ui/widget/infomessage")
 local InputDialog = require("ui/widget/inputdialog")
---local TextViewer = require("ui/widget/textviewer")
+local MultiConfirmBox = require("ui/widget/multiconfirmbox")
 local Trapper = require("ui/trapper")
 local UIManager = require("ui/uimanager")
 local Util = require("util")
 local VirtualKeyboard = require("ui/widget/virtualkeyboard")
 local WidgetContainer = require("ui/widget/container/widgetcontainer")
+local T = require("ffi/util").template
 local lfs = require("libs/libkoreader-lfs")
 local logger = require("logger")
 local util = require("ffi/util")
@@ -32,8 +33,14 @@ local LATEST_VERSION = "https://raw.githubusercontent.com/zwim/calculator.koplug
 local Calculator = WidgetContainer:new{
     name = "calculator",
     is_doc_only = false,
-    dump_file = util.realpath(DataStorage:getDataDir()) .. "/output.calc",
-    init_file = util.realpath(DataStorage:getDataDir()) .. "/init.calc",
+    calculator_output_path = G_reader_settings:readSetting("calculator_output_path") or
+        util.realpath(DataStorage:getDataDir()) .. "/output.calc",
+    calculator_input_path = G_reader_settings:readSetting("calculator_output_path") or
+        util.realpath(DataStorage:getDataDir()) .. "/input.calc",
+    init_file = util.realpath(DataStorage:getDataDir()) .. "/plugins/calculator.koplugin/init.calc",
+    use_init_file = G_reader_settings:readSetting("calculator_use_init_file") or "yes",
+    load_file = G_reader_settings:readSetting("calculator_input_path") or
+        util.realpath(DataStorage:getDataDir()) .. "/init.calc",
     history = "",
     i_num = 1, -- number of next input
     input = {},
@@ -51,12 +58,19 @@ local Calculator = WidgetContainer:new{
             {"programmer", _("Programmer")},
             {"native", _("Native")},
         },
-    round_places = 5, -- decimal places
-    lower_bound = 5, -- switch to scientific if <=10^lower_bound
+    significant_places = 5, -- decimal places
+    lower_bound = 4, -- switch to scientific if <=10^lower_bound
     upper_bound = 6 -- switch to scientific if >=10^upper_bound
 }
 
 function Calculator:init()
+    G_reader_settings:saveSetting("calculator_output_path", self.output_path)
+    G_reader_settings:saveSetting("calculator_input_path", self.input_path)
+    G_reader_settings:saveSetting("calculator_input_path", self.input_path)
+    G_reader_settings:saveSetting("calculator_use_init_file", self.use_init_file)
+    if self.use_init_file == "yes" then
+        self:load(nil, self.init_file)
+    end
     self:onDispatcherRegisterActions()
     self.ui.menu:registerToMainMenu(self)
 end
@@ -112,13 +126,13 @@ function Calculator:getStatusLine()
     local format = self:getString(self.number_format, self.number_formats)
     format = format .. (" "):rep(12-#format)
     return string.format(_("∡ %s      Format: %s      ≈%d"),
-        angle_mode, format, self.round_places)
+        angle_mode, format, self.significant_places)
 end
 
 function Calculator:onCalculatorStart()
     self.angle_mode = G_reader_settings:readSetting("calculator_angle_mode") or self.angle_mode
     self.number_format = G_reader_settings:readSetting("calculator_number_format") or self.number_format
-    self.round_places = G_reader_settings:readSetting("calculator_round_places") or self.round_places
+    self.significant_places = G_reader_settings:readSetting("calculator_significant_places") or self.significant_places
 
     self:addKeyboard()
 
@@ -169,6 +183,8 @@ or type 'help()⮠']])
             is_enter_default = true,
             callback = function()
                 Trapper:wrap(function()
+                    self.input_dialog._input_widget:goToEndOfLine()
+                    self.input_dialog._input_widget:addChars(" ")
                     self:calculate(self.input_dialog:getInputText())
                 end)
                 self.input_dialog:setInputText(self.history)
@@ -176,9 +192,12 @@ or type 'help()⮠']])
             end,
             },
             {
-            text = "⎚",
+            text = "⎚", --clear
             callback = function()
                 Parser:eval("kill()")
+                if self.use_init_file == "yes" then
+                    self:load(nil, self.init_file)
+                end
                 self.history = ""
                 self.input = {}
                 self.input_dialog:setInputText("")
@@ -186,14 +205,39 @@ or type 'help()⮠']])
             },
             {
             text = "⇧",
-            callback = function()
-                self:load(self.init_file)
+            callback = function(touchmenu_instance)
+                UIManager:show(MultiConfirmBox:new{
+                    text = T( _("Use file %1"), self.calculator_input_path),
+                    cancel_text = "✕", --cancel
+                    choice1_text = _("Select"),
+                    choice1_callback = function()
+                        UIManager:close(self.input_dialog)
+                        CalculatorSettingsDialog.choosePathFile(self, touchmenu_instance, "calculator_input_path", false, true, self.load)
+                    end,
+                    choice2_text = "✓", --ok
+                    choice2_callback = function()
+                        self:dump(nil, self.calculator_input_path)
+                    end,
+                })
             end,
             },
             {
             text = "⇩",
-            callback = function()
-                self:dump(self.dump_file)
+            callback = function(touchmenu_instance)
+                UIManager:show(MultiConfirmBox:new{
+                    text = T( _("Use file %1"), self.calculator_output_path),
+                    cancel_text = "✕", --cancel
+                    choice1_text = _("Select"),
+                    choice1_callback = function()
+                        UIManager:close(self.input_dialog)
+                        CalculatorSettingsDialog.choosePathFile(self, touchmenu_instance,
+                            "calculator_output_path", false, true, self.dump)
+                    end,
+                    choice2_text = "✓", --ok
+                    choice2_callback = function()
+                        self:dump(nil, self.calculator_output_path)
+                    end,
+                })
             end,
             },
             {
@@ -206,7 +250,7 @@ or type 'help()⮠']])
             end,
             },
             {
-            text = "✕",
+            text = "✕", --cancel
             callback = function()
                 self:restoreKeyboard()
                 UIManager:close(self.input_dialog)
@@ -214,11 +258,13 @@ or type 'help()⮠']])
             },
         }},
         enter_callback = function()
-                Trapper:wrap(function()
-                    self:calculate(self.input_dialog:getInputText())
-                end)
-                self.input_dialog:setInputText(self.history)
-                self:gotoEnd()
+            Trapper:wrap(function()
+                self.input_dialog._input_widget:goToEndOfLine()
+                self.input_dialog._input_widget:addChars(" ")
+                self:calculate(self.input_dialog:getInputText())
+            end)
+            self.input_dialog:setInputText(self.history)
+            self:gotoEnd()
         end,
         -- Set/save view and cursor position callback
         view_pos_callback = function(top_line_num, charpos)
@@ -239,7 +285,7 @@ or type 'help()⮠']])
     self.input_dialog:onShowKeyboard(true)
 end
 
-function Calculator:load(file_name)
+function Calculator:load(old_file, file_name)
     local file = io.open(file_name, "r")
     if file then
         local line = file:read()
@@ -251,11 +297,16 @@ function Calculator:load(file_name)
     else
         logger.warn("Failed to load file from " ..file_name )
     end
+    if old_file then
+        self:onCalculatorStart()
+    end
 end
 
-function Calculator:dump(file_name)
+function Calculator:dump(old_file, file_name)
+    print("xxxxxxxxxxxxxx file" .. file_name)
     local file = io.open(file_name, "w")
     if file then
+        print("xxxxxxxxxxxxxx anz" .. #self.input)
         for i = 1, #self.input do
             if self.input[i] then
                 file:write("/*i" .. i .. ":*/ " .. self.input[i] .. "\n")
@@ -266,20 +317,23 @@ function Calculator:dump(file_name)
     else
         logger.warn("Failed to dump calculator output to " .. file_name)
     end
+    if old_file then
+        self:onCalculatorStart()
+    end
 end
 
 function Calculator:insertBraces(str)
     local function_names={"exp", "sin", "cos", "tan", "asin", "acos", "atan", "ln", "ld", "log",
-        "sqrt", "√", "rnd", "floor", "showvars"}
+        "sqrt", "√", "rnd", "floor", "showvars", "help"}
     str = str:gsub("EE","E")
     for _, func in pairs(function_names) do
         local _, pos = str:find("^" .. func .. "[^(%a]")
         if not pos then
-            _, pos = str:find("[^%a^_]" .. func .. "[^(%a]")
+            _, pos = str:find("[%p%d]" .. func .. "[^(%a]")
         end
         while pos do
             str = str:sub(1, pos-1) .. "(" .. str:sub(pos)
-            _, pos = str:find("[^%a^_]" .. func .. "[^(%a]")
+            _, pos = str:find("[%p%d]" .. func .. "[^(%a]")
         end
     end
     local _, count_opening = str:gsub("%(", "")
@@ -290,10 +344,24 @@ function Calculator:insertBraces(str)
     return str
 end
 
-function Calculator:formatResult(val, format, round)
-    if val == nil then
-        return nil
+function Calculator:formatMantissaExponent(val, eng)
+    if val == 0 then return "" .. 0 end
+    local exp = math.floor(math.log10(math.abs(val)))
+    local mantissa = val / 10^exp
+    local shift_exp = 0
+    if eng then -- round exponent to multiples of 3
+        shift_exp = exp % 3
+        mantissa = mantissa * 10^shift_exp
     end
+    local ret = "" .. math.floor(mantissa * 10^(self.significant_places-1) + 0.5)/(10^(self.significant_places-1))
+    if mantissa ~= 0 then
+        ret = ret .. "E" .. tostring(exp-shift_exp >= 0 and "+" or "") .. tostring(exp-shift_exp)
+    end
+    return ret
+end
+
+function Calculator:formatResult(val, format)
+    if val == nil then return nil end
 
     local ret = tostring(val)
     if format == "native" then -- lua native format
@@ -304,25 +372,36 @@ function Calculator:formatResult(val, format, round)
         return ret
     end
 
-    if format == "scientific" or format == "engineer" then
-        ret = string.format("%." .. round .. "E", val)
+    if not math.finite(val) then
+        return tostring(val)
+    end
+
+    if format == "scientific" then
+           ret = self:formatMantissaExponent(val, false)
+    elseif format == "engineer" then
+           ret = self:formatMantissaExponent(val, true)
     elseif format == "auto" or format == "programmer" then
-        if val == 0 then
-            return "" .. 0
-        elseif math.abs(val) >= 10^self.upper_bound or math.abs(val) <= 0.1^self.lower_bound then
-            ret = string.format("%." .. round .. "E", val)
+        if math.abs(val) >= 10^self.upper_bound or math.abs(val) <= 0.1^self.lower_bound then
+            ret = self:formatMantissaExponent(val, false)
         else
-            ret = "" .. math.floor(val * 10^self.round_places + 0.5)/(10^self.round_places)
+            local msb = math.floor(math.log10(val)) -- most significant place
+            if val >= 1 then
+                msb = 0
+            end
+            ret = "" .. math.floor(val * 10^(self.significant_places-msb-1)+0.5)/10^(self.significant_places-msb-1)
         end
     end
 
     -- tidy result
-    local repl
-    repeat -- remove e.g. 1.400e+04 -> 1.4e+04
-        ret, repl = ret:gsub("0E","E")
-    until (repl == 0)
-    ret = ret:gsub(".E","E") -- 1.E+04 -> 1E+04
+    if ret:find("%.") then
+        local repl
+        repeat -- remove e.g. 1.400e+04 -> 1.4e+04
+            ret, repl = ret:gsub("0E","E")
+        until (repl == 0)
+        ret = ret:gsub("%.E","E") -- 1.E+04 -> 1E+04
+    end
     ret = ret:gsub("E%+00$","") -- 1.2E+00 -> 1.2
+    ret = ret:gsub("E%+0$","") -- 1.2E+00 -> 1.2
 
     if format == "programmer" then
         local tmp = string.format("%016X", val)
@@ -341,7 +420,7 @@ end
 function Calculator:calculate(input_text)
     local history_table = Util.splitToArray(self.history, "\n", false)
     local input_table =  Util.splitToArray(input_text, "\n", false)
-    local command_position = 1
+    local command_position
 
     -- search first difference between history and input
     for i = 1,#input_table do
@@ -350,11 +429,19 @@ function Calculator:calculate(input_text)
             break
         end
     end
+    if command_position and input_table[command_position] == " " then
+        return
+    end
     if command_position and input_table[command_position] then
         local new_command = input_table[command_position]
+        new_command = new_command:gsub("^ *","")
+        new_command = new_command:gsub(" *$","")
         new_command = Parser:greek2text(new_command)
         new_command = new_command:gsub("^[io][0-9]*: ","")  -- strip leading "ixxx: " or "oxxx: "
         new_command = self:insertBraces(new_command)
+        new_command = new_command:gsub("^[io][0-9]*: ","")  -- strip leading "ixxx: " or "oxxx: "
+        new_command = new_command:gsub("≥",">=")  -- strip leading "ixxx: " or "oxxx: "
+        new_command = new_command:gsub("≤","<=")  -- strip leading "ixxx: " or "oxxx: "
 
         local last_result, last_err = Parser:eval(new_command)
 
@@ -363,10 +450,10 @@ function Calculator:calculate(input_text)
         elseif last_result ~= nil and not last_err then
             self.input[#self.input + 1] = new_command
             -- last result is stored in "oxxx"
-            Parser:eval(Parser:parse("o" .. #self.input .. ":=" .. tostring(last_result)))
+            Parser:eval(Parser:parse("o" .. #self.input .. "=" .. tostring(last_result)))
             -- last result is stored in "ans"
-            Parser:eval(Parser:parse("ans:" .. tostring(last_result)))
-            last_result = self:formatResult(last_result, self.number_format, self.round_places)
+            Parser:eval(Parser:parse("ans=" .. tostring(last_result)))
+            last_result = self:formatResult(last_result, self.number_format, self.significant_places)
 
             if command_position ~= #input_table then  -- an old entry was changed
                 self.history = input_text .. "\ni" .. #self.input .. ": " .. new_command
@@ -387,6 +474,7 @@ function Calculator:calculate(input_text)
                 text = last_err or _("Input error"),
                 })
         end
+        self.history = self.history:gsub("\n\n","\n")
     end
 end
 
@@ -397,7 +485,7 @@ function Calculator:getCurrentVersion()
         version = file:read("*a")
         file:close()
     else
-        logger.warn("Did not find version file " .. VERSION_FILE )
+        logger.warn("Did not find version file " .. VERSION_FILE)
     end
     return version
 end

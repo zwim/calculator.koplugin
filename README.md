@@ -4,7 +4,7 @@ A calculator plugin for KOReader.
 ## Installation
 Go to https://github.com/zwim/calculator.koplugin/releases and download the desired `koreader.plugin-x.x.x.zip` and unpack it to `koreader/plugins/calculator.koplugin`.
 
-If you want predefined physical constants, then move `init.calc` to `koreader/`, otherwise you can delete `init.calc`.
+Predefined physical constants, are in `init.calc`. You can autoload them (see settings menu). If you don't need them delete `init.calc`.
 
 The file `VERSION` is used for update-informations. If you delete it, you don't get a notification update.
 
@@ -13,17 +13,19 @@ The file `VERSION` is used for update-informations. If you delete it, you don't 
 
 You find the calculator in `More tools/calculator` additionally you can set a gesture (in the device submenu) to call it.
 
-Enter a calculation and press `Calc`. You can see your inputs in lines starting with `ixxx:` and the results in lines with `oxxx:`.
+Enter a calculation and press `Σ=`. You can see your inputs in lines starting with `ixxx:` and the results in lines with `oxxx:`.
 
 If you change something in an old line, this line will be used for the next calculation.
 
-The results are stored in variables `oxxx` and the last result is additional in the variable `ans`.
+The results are stored in variables `o1, o2, ...` and the last result is additional in the variable `ans`.
 
-All the entered calculations and the result can be saved to `koreader/output.calc`.
+Most of the time you can skip the opening braces in a function (e.g. sin40+66 is replaces with sin(40+6); but sin40)+60 gives sin(40)+60; try it out).
 
-Predefined expressions my be loaded from `koreader/init.calc`
+All the entered calculations and the result can be saved with the `⇩'` button.
 
-You find the settings in the Hamburger menu.
+Predefined expressions my be loaded with the `⇧` button.
+
+You change the settings in the Hamburger menu.
 
 
 ![grafik](https://user-images.githubusercontent.com/36999612/121774303-3af12000-cb82-11eb-94c9-a0248b33c060.png)
@@ -32,7 +34,7 @@ You can set the output to different modi: For example if the evaluation yields 1
 
 `Scientific` -> 1.23456789E+7
 
-`Engineer` -> 12.3456789E+6 (not implemented yet)
+`Engineer` -> 12.3456789E+6 
 
 `Auto` -> switches to Scientific if the absolute value is greater than 1000000 or less than 0.0001
 
@@ -40,7 +42,7 @@ You can set the output to different modi: For example if the evaluation yields 1
 
 `Programmer` -> show the result in `Auto` plus the value in HEX.
 
-Additional the maximum number of decimal places can be set with `Round`.
+Additional the maximum number of significant places can be set with `Significance ≈`. (e.g. significance set to 2: 0.0001234 -> 0.00012)
 
 ![grafik](https://user-images.githubusercontent.com/36999612/121774734-139b5280-cb84-11eb-8a80-85df783ea1f4.png)
 
@@ -79,7 +81,12 @@ The following operators are supported with increasing priority:
     "?:" ternary like in C
     "&&" logical and, the lua way
     "||" logical or, the lua way
-    "!&" logical nand, the lua way
+    "##" logical nand, the lua way, -> logical not
+    "~~" logical nand, the lua way
+    "&"  bitwise and
+    "|"  bitwise or
+    "#"  bitwise nand -> bitwise not
+    "~"  bitwise nand
     "<="
     "=="
     ">="
@@ -135,4 +142,3 @@ Examples:
     x=2,y=4  -> 4, set x=2 and y=4
     1>2 || 2<10 && 7 -> 7
 ```
-
