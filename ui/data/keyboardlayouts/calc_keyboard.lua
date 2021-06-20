@@ -221,6 +221,8 @@ local calc_popup = {
     },
     _vz = {
         "z",
+        east = "o",
+        west = "i",
     },
 }
 
