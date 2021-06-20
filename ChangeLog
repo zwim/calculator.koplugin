@@ -1,6 +1,8 @@
 Version: 0.9.2
   Bug: Variable ans works now
 
+  Added automatic load of "init.calc"
+  Added fileselector for loading and saving files
   Added logical xor and not
   Added bitwise or, and, nand and xor
   Added %= operator
@@ -11,7 +13,6 @@ Version: 0.9.2
   Added Engineering mode (Exponentials multiply of three)
   Better presentation of results (rounding, trimming)
   Changed rounding to significant places
-
 
 Version: 0.9.1
   Use Unicode symbols instead of text (Translations!!!)

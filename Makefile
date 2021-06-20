@@ -24,6 +24,7 @@ zip: clean
 		--exclude '*.swp' \
 		--exclude '*.zip' \
 		--exclude '*install-plugin.sh' \
+		--exclude '*.sh' \
 		--exclude 'tmp*' \
 		. tmp/calculator.koplugin
 
