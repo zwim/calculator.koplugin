@@ -29,7 +29,7 @@ You change the settings in the Hamburger menu.
 
 ![grafik](https://user-images.githubusercontent.com/36999612/122679158-18967c80-d1ea-11eb-9a20-177d41908e9b.png)
 
-![grafik](https://user-images.githubusercontent.com/36999612/122679427-1680ed80-d1eb-11eb-801f-2bf9413fbced.png)
+![grafik](https://user-images.githubusercontent.com/36999612/122679584-c35b6a80-d1eb-11eb-9c31-e28a7008fe89.png)
 
 
 You can set the output to different modi: For example if the evaluation yields 12345678.9
@@ -46,7 +46,7 @@ You can set the output to different modi: For example if the evaluation yields 1
 
 Additional the maximum number of significant places can be set with `Significance ≈`. (e.g. significance set to 2: 0.0001234 -> 0.00012)
 
-![grafik](https://user-images.githubusercontent.com/36999612/122679543-914a0880-d1eb-11eb-850f-396ce44905cb.png)
+![grafik](https://user-images.githubusercontent.com/36999612/122679565-af176d80-d1eb-11eb-881a-a06c100efe36.png)
 
 
 ## Operators and functions
