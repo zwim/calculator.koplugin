@@ -34,12 +34,13 @@ local Calculator = WidgetContainer:new{
     name = "calculator",
     is_doc_only = false,
     calculator_output_path = G_reader_settings:readSetting("calculator_output_path") or
-		util.realpath(DataStorage:getDataDir()) .. "/output.calc",
+        util.realpath(DataStorage:getDataDir()) .. "/output.calc",
     calculator_input_path = G_reader_settings:readSetting("calculator_output_path") or
-		util.realpath(DataStorage:getDataDir()) .. "/input.calc",
+        util.realpath(DataStorage:getDataDir()) .. "/input.calc",
     init_file = util.realpath(DataStorage:getDataDir()) .. "/plugins/calculator.koplugin/init.calc",
-	use_init_file = G_reader_settings:readSetting("calculator_use_init_file") or "yes",
-    load_file = G_reader_settings:readSetting("calculator_input_path") or util.realpath(DataStorage:getDataDir()) .. "/init.calc",
+    use_init_file = G_reader_settings:readSetting("calculator_use_init_file") or "yes",
+    load_file = G_reader_settings:readSetting("calculator_input_path") or
+        util.realpath(DataStorage:getDataDir()) .. "/init.calc",
     history = "",
     i_num = 1, -- number of next input
     input = {},
@@ -63,13 +64,13 @@ local Calculator = WidgetContainer:new{
 }
 
 function Calculator:init()
-	G_reader_settings:saveSetting("calculator_output_path", self.output_path)
-	G_reader_settings:saveSetting("calculator_input_path", self.input_path)
-	G_reader_settings:saveSetting("calculator_input_path", self.input_path)
-	G_reader_settings:saveSetting("calculator_use_init_file", self.use_init_file)
-	if self.use_init_file == "yes" then
-		self:load(nil, self.init_file)
-	end
+    G_reader_settings:saveSetting("calculator_output_path", self.output_path)
+    G_reader_settings:saveSetting("calculator_input_path", self.input_path)
+    G_reader_settings:saveSetting("calculator_input_path", self.input_path)
+    G_reader_settings:saveSetting("calculator_use_init_file", self.use_init_file)
+    if self.use_init_file == "yes" then
+        self:load(nil, self.init_file)
+    end
     self:onDispatcherRegisterActions()
     self.ui.menu:registerToMainMenu(self)
 end
@@ -194,9 +195,9 @@ or type 'help()⮠']])
             text = "⎚", --clear
             callback = function()
                 Parser:eval("kill()")
-				if self.use_init_file == "yes" then
-					self:load(nil, self.init_file)
-				end
+                if self.use_init_file == "yes" then
+                    self:load(nil, self.init_file)
+                end
                 self.history = ""
                 self.input = {}
                 self.input_dialog:setInputText("")
@@ -205,37 +206,38 @@ or type 'help()⮠']])
             {
             text = "⇧",
             callback = function(touchmenu_instance)
-				UIManager:show(MultiConfirmBox:new{
-					text = T( _("Use file %1"), self.calculator_input_path),
-					cancel_text = "✕", --cancel
-					choice1_text = _("Select"),
-					choice1_callback = function()
-						UIManager:close(self.input_dialog)
-						CalculatorSettingsDialog.choosePathFile(self, touchmenu_instance, "calculator_input_path", false, true, self.load)
-					end,
-					choice2_text = "✓", --ok
-					choice2_callback = function()
-						self:dump(nil, self.calculator_input_path)
-					end,
-				})
+                UIManager:show(MultiConfirmBox:new{
+                    text = T( _("Use file %1"), self.calculator_input_path),
+                    cancel_text = "✕", --cancel
+                    choice1_text = _("Select"),
+                    choice1_callback = function()
+                        UIManager:close(self.input_dialog)
+                        CalculatorSettingsDialog.choosePathFile(self, touchmenu_instance, "calculator_input_path", false, true, self.load)
+                    end,
+                    choice2_text = "✓", --ok
+                    choice2_callback = function()
+                        self:dump(nil, self.calculator_input_path)
+                    end,
+                })
             end,
             },
             {
             text = "⇩",
             callback = function(touchmenu_instance)
-				UIManager:show(MultiConfirmBox:new{
-					text = T( _("Use file %1"), self.calculator_output_path),
-					cancel_text = "✕", --cancel
-					choice1_text = _("Select"),
-					choice1_callback = function()
-						UIManager:close(self.input_dialog)
-						CalculatorSettingsDialog.choosePathFile(self, touchmenu_instance, "calculator_output_path", false, true, self.dump)
-					end,
-					choice2_text = "✓", --ok
-					choice2_callback = function()
-						self:dump(nil, self.calculator_output_path)
-					end,
-				})
+                UIManager:show(MultiConfirmBox:new{
+                    text = T( _("Use file %1"), self.calculator_output_path),
+                    cancel_text = "✕", --cancel
+                    choice1_text = _("Select"),
+                    choice1_callback = function()
+                        UIManager:close(self.input_dialog)
+                        CalculatorSettingsDialog.choosePathFile(self, touchmenu_instance,
+                            "calculator_output_path", false, true, self.dump)
+                    end,
+                    choice2_text = "✓", --ok
+                    choice2_callback = function()
+                        self:dump(nil, self.calculator_output_path)
+                    end,
+                })
             end,
             },
             {
@@ -295,16 +297,16 @@ function Calculator:load(old_file, file_name)
     else
         logger.warn("Failed to load file from " ..file_name )
     end
-	if old_file then
-		self:onCalculatorStart()
-	end
+    if old_file then
+        self:onCalculatorStart()
+    end
 end
 
 function Calculator:dump(old_file, file_name)
-	print("xxxxxxxxxxxxxx file" .. file_name)
+    print("xxxxxxxxxxxxxx file" .. file_name)
     local file = io.open(file_name, "w")
     if file then
-		print("xxxxxxxxxxxxxx anz" .. #self.input)
+        print("xxxxxxxxxxxxxx anz" .. #self.input)
         for i = 1, #self.input do
             if self.input[i] then
                 file:write("/*i" .. i .. ":*/ " .. self.input[i] .. "\n")
@@ -315,9 +317,9 @@ function Calculator:dump(old_file, file_name)
     else
         logger.warn("Failed to dump calculator output to " .. file_name)
     end
-	if old_file then
-		self:onCalculatorStart()
-	end
+    if old_file then
+        self:onCalculatorStart()
+    end
 end
 
 function Calculator:insertBraces(str)
@@ -343,7 +345,7 @@ function Calculator:insertBraces(str)
 end
 
 function Calculator:formatMantissaExponent(val, eng)
-	if val == 0 then return "" .. 0 end
+    if val == 0 then return "" .. 0 end
     local exp = math.floor(math.log10(math.abs(val)))
     local mantissa = val / 10^exp
     local shift_exp = 0
@@ -375,9 +377,9 @@ function Calculator:formatResult(val, format)
     end
 
     if format == "scientific" then
-   		ret = self:formatMantissaExponent(val, false)
+           ret = self:formatMantissaExponent(val, false)
     elseif format == "engineer" then
-   		ret = self:formatMantissaExponent(val, true)
+           ret = self:formatMantissaExponent(val, true)
     elseif format == "auto" or format == "programmer" then
         if math.abs(val) >= 10^self.upper_bound or math.abs(val) <= 0.1^self.lower_bound then
             ret = self:formatMantissaExponent(val, false)
@@ -483,7 +485,7 @@ function Calculator:getCurrentVersion()
         version = file:read("*a")
         file:close()
     else
-        logger.warn("Did not find version file " .. VERSION_FILE )
+        logger.warn("Did not find version file " .. VERSION_FILE)
     end
     return version
 end
