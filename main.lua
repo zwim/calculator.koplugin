@@ -384,7 +384,7 @@ function Calculator:formatResult(val, format)
         if math.abs(val) >= 10^self.upper_bound or math.abs(val) <= 0.1^self.lower_bound then
             ret = self:formatMantissaExponent(val, false)
         else
-            local msb = math.floor(math.log10(val)) -- most significant place
+            local msb = math.floor(math.log10(math.abs(val))) -- most significant place
             if val >= 1 then
                 msb = 0
             end
