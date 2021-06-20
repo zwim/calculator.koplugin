@@ -303,10 +303,8 @@ function Calculator:load(old_file, file_name)
 end
 
 function Calculator:dump(old_file, file_name)
-    print("xxxxxxxxxxxxxx file" .. file_name)
     local file = io.open(file_name, "w")
     if file then
-        print("xxxxxxxxxxxxxx anz" .. #self.input)
         for i = 1, #self.input do
             if self.input[i] then
                 file:write("/*i" .. i .. ":*/ " .. self.input[i] .. "\n")
