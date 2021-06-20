@@ -21,14 +21,16 @@ The results are stored in variables `o1, o2, ...` and the last result is additio
 
 Most of the time you can skip the opening braces in a function (e.g. sin40+66 is replaces with sin(40+6); but sin40)+60 gives sin(40)+60; try it out).
 
-All the entered calculations and the result can be saved with the `⇩'` button.
+All the entered calculations and the results can be saved with the `⇩'` button.
 
 Predefined expressions my be loaded with the `⇧` button.
 
 You change the settings in the Hamburger menu.
 
+![grafik](https://user-images.githubusercontent.com/36999612/122679158-18967c80-d1ea-11eb-9a20-177d41908e9b.png)
 
-![grafik](https://user-images.githubusercontent.com/36999612/121774303-3af12000-cb82-11eb-94c9-a0248b33c060.png)
+![grafik](https://user-images.githubusercontent.com/36999612/122679427-1680ed80-d1eb-11eb-801f-2bf9413fbced.png)
+
 
 You can set the output to different modi: For example if the evaluation yields 12345678.9
 
@@ -44,7 +46,7 @@ You can set the output to different modi: For example if the evaluation yields 1
 
 Additional the maximum number of significant places can be set with `Significance ≈`. (e.g. significance set to 2: 0.0001234 -> 0.00012)
 
-![grafik](https://user-images.githubusercontent.com/36999612/121774734-139b5280-cb84-11eb-8a80-85df783ea1f4.png)
+![grafik](https://user-images.githubusercontent.com/36999612/122679543-914a0880-d1eb-11eb-850f-396ce44905cb.png)
 
 
 ## Operators and functions
