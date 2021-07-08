@@ -30,5 +30,4 @@ zip: clean
 
 	cd tmp && 7z a -l -mx9 -mfb=256 -mmt=on \
 		../calculator.koplugin-$(VERSION).zip *
-	
 
