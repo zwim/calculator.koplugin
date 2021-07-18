@@ -60,7 +60,6 @@ function CalculatorSettingsDialog:init()
         }
     }
 
-    local buttons = {}
     local radio_buttons_angle = {}
     for _, v in pairs(self.parent.angle_modes) do
         table.insert(radio_buttons_angle, {
@@ -119,19 +118,19 @@ function CalculatorSettingsDialog:init()
         })
     end
 
-    table.insert(buttons, {
+    local buttons = {{
         {
             text = "✕", --close
             callback = function()
-                UIManager:close(self.parent.settings_dialog)
+                UIManager:close(self)
             end,
         },
         {
             text ="✓", --ok
             is_enter_default = true,
             callback = function()
-                UIManager:close(self.parent.settings_dialog)
-                local new_angle_mode = self.parent.settings_dialog.radio_button_table_angle.checked_button.provider
+                UIManager:close(self)
+                local new_angle_mode = self.radio_button_table_angle.checked_button.provider
                 if new_angle_mode ~= self.parent.angle_mode then
                     self.parent.angle_mode = new_angle_mode
                     if self.parent.angle_mode == "gon" then
@@ -145,21 +144,21 @@ function CalculatorSettingsDialog:init()
                     self.parent.status_line = self.parent:getStatusLine()
                 end
 
-                local new_format = self.parent.settings_dialog.radio_button_table_format.checked_button.provider
+                local new_format = self.radio_button_table_format.checked_button.provider
                 if new_format ~= self.parent.number_format then
                     self.parent.number_format = new_format
                     G_reader_settings:saveSetting("calculator_number_format", new_format)
                     self.parent.status_line = self.parent:getStatusLine()
                 end
 
-                local new_significant = self.parent.settings_dialog.radio_button_table_significant.checked_button.provider
+                local new_significant = self.radio_button_table_significant.checked_button.provider
                 if new_significant ~= self.parent.significant_places then
                     self.parent.significant_places = new_significant
                     G_reader_settings:saveSetting("calculator_significant_places", new_significant)
                     self.parent.status_line = self.parent:getStatusLine()
                 end
 
-                local new_init_file = self.parent.settings_dialog.radio_button_table_init.checked_button.provider
+                local new_init_file = self.radio_button_table_init.checked_button.provider
                 if new_init_file ~= self.parent.use_init_file then
                     self.parent.use_init_file = new_init_file
                     G_reader_settings:saveSetting("calculator_use_init_file", new_init_file)
@@ -169,7 +168,7 @@ function CalculatorSettingsDialog:init()
                 self.parent:onCalculatorStart()
             end,
         },
-    })
+    }}
 
     self.radio_button_table_angle = RadioButtonTable:new{
         radio_buttons = radio_buttons_angle,
@@ -229,8 +228,8 @@ function CalculatorSettingsDialog:init()
             self.title_bar,
             HorizontalGroup:new{
                     dimen = Geom:new{
-                    w = self.title_bar:getSize().w,
-                    h = self.radio_button_table_significant:getSize().h,
+                        w = self.title_bar:getSize().w,
+                        h = self.radio_button_table_significant:getSize().h,
                 },
                 VerticalGroup:new{ -- angle and format
                     align = "center",
@@ -335,7 +334,7 @@ chooses a path or (an existing) file (borrowed from coverimage)
     Can be used for migrating the contents of the old path to the new one
 ]]
 function CalculatorSettingsDialog:choosePathFile(touchmenu_instance, key, folder_only, new_file, migrate)
-    local old_path, dummy = util.splitFilePathName(self[key])
+    local old_path, _ = util.splitFilePathName(self[key])
     UIManager:show(PathChooser:new{
         select_directory = folder_only or new_file,
         select_file = not folder_only,
@@ -371,9 +370,7 @@ function CalculatorSettingsDialog:choosePathFile(touchmenu_instance, key, folder
                             text = _("Save"),
                             callback = function()
                                 local file = file_input:getInputText()
-                                print("xxxxxxxx " .. tostring(key) .. " " .. tostring(self[key]))
                                 if migrate and self[key] and self[key] ~= "" then
-                                    print("xxxxxxxxxxxxxxxx migrate")
                                     migrate(self, self[key], file)
                                 end
                                 self[key] = file

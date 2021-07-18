@@ -26,6 +26,7 @@ zip: clean
 		--exclude '*install-plugin.sh' \
 		--exclude '*.sh' \
 		--exclude 'tmp*' \
+		--exclude 'config.yml' \
 		. tmp/calculator.koplugin
 
 	cd tmp && 7z a -l -mx9 -mfb=256 -mmt=on \

@@ -1,4 +1,11 @@
-Version: 0.9.2
+Version: 1.1.0
+  Added conversion
+  Average function
+
+Version: 1.0.2
+  Natural sorting of variables
+
+Version: 1.0.1
   Bug: Variable ans works now
 
   Added automatic load of "init.calc"
