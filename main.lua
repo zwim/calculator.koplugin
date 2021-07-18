@@ -150,7 +150,7 @@ function Calculator:onCalculatorStart()
     self.status_line = self.status_line or self:getStatusLine()
 
     local hint = _([[Enter your calculations and press '⮠'
-'Σ=' Calculate, '⎚' Clear, '⇧' Load,
+'♺' Convert, '⎚' Clear, '⇧' Load,
 '⇩' Store, '☰' Settings, '✕' Close
 or type 'help()⮠']])
     local current_version = self:getCurrentVersion()

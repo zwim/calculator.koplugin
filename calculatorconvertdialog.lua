@@ -75,6 +75,14 @@ local power_table = {
     {"BTU/h",293.07107017},
 }
 
+local speed_table = {
+    {"m/s",1},
+    {"km/h",1/3.6},
+    {"ft/s",1/2.23604},
+    {"mph",1/2.2364},
+    {"knots",1/1.94338},
+}
+
 local CalculatorConvertDialog = InputContainer:new{
     is_always_active = true,
     title = _("Convert"),
@@ -147,6 +155,22 @@ function CalculatorConvertDialog:init()
                 UIManager:show(self.units_dialog)
             end,
         },
+        ["06_speed"] = {
+            text = _("Speed"),
+            callback = function()
+                UIManager:close(self)
+                self.units_dialog = CalculatorUnitsDialog:new{
+                    parent = self,
+                    units = speed_table,
+                    }
+                UIManager:show(self.units_dialog)
+            end,
+        },
+
+--[[        ["98_dummy"] = {
+            text = "",
+        },
+    ]]
         ["99_close"] = {
             text = "✕", --close
             callback = function()
