@@ -83,6 +83,12 @@ local speed_table = {
     {"knots",1/1.94338},
 }
 
+local temperature_table = {
+    {"°C", "c2k", "k2c"},
+    {"K", "", "" },
+    {"F", "f2k", "k2f"},
+}
+
 local CalculatorConvertDialog = InputContainer:new{
     is_always_active = true,
     title = _("Convert"),
@@ -100,7 +106,7 @@ local CalculatorConvertDialog = InputContainer:new{
 function CalculatorConvertDialog:init()
     local convert_buttons = {
         ["01_length"] = {
-            text = " Length",
+            text = "Length",
             callback = function()
                 UIManager:close(self)
                 self.units_dialog = CalculatorUnitsDialog:new{
@@ -110,8 +116,30 @@ function CalculatorConvertDialog:init()
                 UIManager:show(self.units_dialog)
             end,
         },
-        ["02_mass"] = {
-            text = ("Mass"),
+        ["02_area"] = {
+            text = "Area",
+            callback = function()
+                UIManager:close(self)
+                self.units_dialog = CalculatorUnitsDialog:new{
+                    parent = self,
+                    units = area_table,
+                    }
+                UIManager:show(self.units_dialog)
+            end,
+        },
+        ["03_volume"] = {
+            text = "Volume",
+            callback = function()
+                UIManager:close(self)
+                self.units_dialog = CalculatorUnitsDialog:new{
+                    parent = self,
+                    units = volume_table,
+                    }
+                UIManager:show(self.units_dialog)
+            end,
+        },
+        ["04_mass"] = {
+            text = "Mass",
             is_enter_default = true,
             callback = function()
                 UIManager:close(self)
@@ -122,8 +150,8 @@ function CalculatorConvertDialog:init()
                 UIManager:show(self.units_dialog)
             end,
         },
-        ["03_time"] = {
-            text = _("Time"),
+        ["05_time"] = {
+            text = "Time",
             callback = function()
                 UIManager:close(self)
                 self.units_dialog = CalculatorUnitsDialog:new{
@@ -133,8 +161,8 @@ function CalculatorConvertDialog:init()
                 UIManager:show(self.units_dialog)
             end,
         },
-        ["04_energy"] = {
-            text = _("Energy"),
+        ["06_energy"] = {
+            text = "Energy",
             callback = function()
                 UIManager:close(self)
                 self.units_dialog = CalculatorUnitsDialog:new{
@@ -144,7 +172,7 @@ function CalculatorConvertDialog:init()
                 UIManager:show(self.units_dialog)
             end,
         },
-        ["05_power"] = {
+        ["07_power"] = {
             text = _("Power"),
             callback = function()
                 UIManager:close(self)
@@ -155,8 +183,8 @@ function CalculatorConvertDialog:init()
                 UIManager:show(self.units_dialog)
             end,
         },
-        ["06_speed"] = {
-            text = _("Speed"),
+        ["08_speed"] = {
+            text = "Speed",
             callback = function()
                 UIManager:close(self)
                 self.units_dialog = CalculatorUnitsDialog:new{
@@ -166,11 +194,32 @@ function CalculatorConvertDialog:init()
                 UIManager:show(self.units_dialog)
             end,
         },
+        ["09_pressure"] = {
+            text = "Volume",
+            callback = function()
+                UIManager:close(self)
+                self.units_dialog = CalculatorUnitsDialog:new{
+                    parent = self,
+                    units = pressure_table,
+                    }
+                UIManager:show(self.units_dialog)
+            end,
+        },
+        ["10_temperature"] = {
+            text = "Temperature",
+            callback = function()
+                UIManager:close(self)
+                self.units_dialog = CalculatorUnitsDialog:new{
+                    parent = self,
+                    units = temperature_table,
+                    }
+                UIManager:show(self.units_dialog)
+            end,
+        },
 
---[[        ["98_dummy"] = {
+        ["98_dummy"] = {
             text = "",
         },
-    ]]
         ["99_close"] = {
             text = "✕", --close
             callback = function()
@@ -186,7 +235,6 @@ function CalculatorConvertDialog:init()
             table.insert(highlight_buttons, {})
         end
         table.insert(highlight_buttons[#highlight_buttons], button)
-        logger.dbg("ReaderHighlight", idx..": line "..#highlight_buttons..", col "..#highlight_buttons[#highlight_buttons])
     end
 
     self[1] = ButtonDialogTitle:new{
@@ -195,7 +243,6 @@ function CalculatorConvertDialog:init()
     }
 
 end
-
 
 function CalculatorConvertDialog:onShow()
     UIManager:setDirty(self, function()

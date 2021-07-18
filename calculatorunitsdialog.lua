@@ -62,6 +62,7 @@ function CalculatorUnitsDialog:init()
             text = v[1],
             checked = false,
             provider = v[2],
+            second = v[3],
             },
         })
     end
@@ -85,11 +86,27 @@ function CalculatorUnitsDialog:init()
                     .. " -> " .. self.radio_button_table_units_too.checked_button.text
                 local calc = self.parent.parent
 
-                calc.input_dialog._input_widget:goToEndOfLine()
-                calc.input_dialog._input_widget:addChars("*(" .. tostring(from) .. "/" .. tostring(too) ..")" .. comment)
-                calc:calculate(calc.input_dialog:getInputText())
-                calc.input_dialog:setInputText(calc.history)
-                calc:gotoEnd()
+                if type(from) == "number" and type(too) == "number" then
+                    -- braces around input
+                    calc.input_dialog._input_widget:goToStartOfLine()
+                    calc.input_dialog._input_widget:addChars("(")
+                    calc.input_dialog._input_widget:goToEndOfLine()
+                    calc.input_dialog._input_widget:addChars(")")
+                    -- do the conversion
+                    calc.input_dialog._input_widget:addChars("*(" .. tostring(from) .. "/" .. tostring(too) ..")" .. comment)
+                    calc:calculate(calc.input_dialog:getInputText())
+                    calc.input_dialog:setInputText(calc.history)
+                    calc:gotoEnd()
+                else
+                    calc.input_dialog._input_widget:goToStartOfLine()
+                    calc.input_dialog._input_widget:addChars(from .. "(")
+
+                    calc.input_dialog._input_widget:goToStartOfLine()
+                    calc.input_dialog._input_widget:addChars(too:reverse() .. "(")
+
+                    calc.input_dialog._input_widget:goToEndOfLine()
+                    calc.input_dialog._input_widget:addChars("))" .. comment)
+                end
             end,
         },
     }}
