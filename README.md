@@ -13,7 +13,7 @@ The file `VERSION` is used for update-informations. If you delete it, you don't 
 
 You find the calculator in `More tools/calculator` additionally you can set a gesture (in the device submenu) to call it.
 
-Enter a calculation and press `Σ=`. You can see your inputs in lines starting with `ixxx:` and the results in lines with `oxxx:`.
+Enter a calculation and press `⮠`. You can see your inputs in lines starting with `ixxx:` and the results in lines with `oxxx:`.
 
 If you change something in an old line, this line will be used for the next calculation.
 
@@ -36,7 +36,7 @@ You can set the output to different modi: For example if the evaluation yields 1
 
 `Scientific` -> 1.23456789E+7
 
-`Engineer` -> 12.3456789E+6 
+`Engineer` -> 12.3456789E+6
 
 `Auto` -> switches to Scientific if the absolute value is greater than 1000000 or less than 0.0001
 
@@ -112,6 +112,7 @@ the angular functions can operate on degree, radiant and gon.
     "acos("
     "asin("
     "atan("
+    "avg("      average of multiple values
     "bug("      show hints for a bug
     "cos("
     "exp("

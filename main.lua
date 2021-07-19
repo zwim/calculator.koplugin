@@ -25,6 +25,7 @@ if lfs.attributes(EXTERNAL_PLUGIN, "mode") == "directory" then
 end
 
 local CalculatorSettingsDialog = require("calculatorsettingsdialog")
+local CalculatorConvertDialog = require("calculatorconvertdialog")
 local Parser = require("formulaparser")
 
 local VERSION_FILE = DataStorage:getDataDir() .. "/plugins/calculator.koplugin/VERSION"
@@ -149,7 +150,7 @@ function Calculator:onCalculatorStart()
     self.status_line = self.status_line or self:getStatusLine()
 
     local hint = _([[Enter your calculations and press '⮠'
-'Σ=' Calculate, '⎚' Clear, '⇧' Load,
+'♺' Convert, '⎚' Clear, '⇧' Load,
 '⇩' Store, '☰' Settings, '✕' Close
 or type 'help()⮠']])
     local current_version = self:getCurrentVersion()
@@ -179,16 +180,12 @@ or type 'help()⮠']])
         lang = "Calculator",
         buttons = {{
             {
-            text = "Σ=",
-            is_enter_default = true,
+            text = "♺", -- convert
             callback = function()
-                Trapper:wrap(function()
-                    self.input_dialog._input_widget:goToEndOfLine()
-                    self.input_dialog._input_widget:addChars(" ")
-                    self:calculate(self.input_dialog:getInputText())
-                end)
-                self.input_dialog:setInputText(self.history)
-                self:gotoEnd()
+                self.convert_dialog = CalculatorConvertDialog:new{
+                    parent = self,
+                }
+                UIManager:show(self.convert_dialog)
             end,
             },
             {
