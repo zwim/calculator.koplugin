@@ -60,9 +60,8 @@ function CalculatorUnitsDialog:init()
         table.insert(radio_buttons_units, {
             {
             text = v[1],
-            checked = false,
+            checked = v[3] ~= nil,
             provider = v[2],
-            second = v[3],
             },
         })
     end
@@ -86,19 +85,24 @@ function CalculatorUnitsDialog:init()
                     .. " -> " .. self.radio_button_table_units_too.checked_button.text
                 local calc = self.parent.parent
 
+                -- if no input, in the actual line -> insert `ans`
+                calc.input_dialog._input_widget:goToEndOfLine()
+                local start_location = calc.input_dialog._input_widget.charpos
+                calc.input_dialog._input_widget:goToStartOfLine()
+                local end_location = calc.input_dialog._input_widget.charpos
+                if start_location == end_location then
+                    calc.input_dialog._input_widget:addChars("ans")
+                    calc.input_dialog._input_widget:goToStartOfLine()
+                end
+
                 if type(from) == "number" and type(too) == "number" then
                     -- braces around input
-                    calc.input_dialog._input_widget:goToStartOfLine()
                     calc.input_dialog._input_widget:addChars("(")
                     calc.input_dialog._input_widget:goToEndOfLine()
                     calc.input_dialog._input_widget:addChars(")")
                     -- do the conversion
                     calc.input_dialog._input_widget:addChars("*(" .. tostring(from) .. "/" .. tostring(too) ..")" .. comment)
-                    calc:calculate(calc.input_dialog:getInputText())
-                    calc.input_dialog:setInputText(calc.history)
-                    calc:gotoEnd()
                 else
-                    calc.input_dialog._input_widget:goToStartOfLine()
                     calc.input_dialog._input_widget:addChars(from .. "(")
 
                     calc.input_dialog._input_widget:goToStartOfLine()
@@ -107,6 +111,10 @@ function CalculatorUnitsDialog:init()
                     calc.input_dialog._input_widget:goToEndOfLine()
                     calc.input_dialog._input_widget:addChars("))" .. comment)
                 end
+
+                calc:calculate(calc.input_dialog:getInputText())
+                calc.input_dialog:setInputText(calc.history)
+                calc:gotoEnd()
             end,
         },
     }}

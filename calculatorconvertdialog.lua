@@ -19,7 +19,7 @@ local length_table = {
     {"mm",1e-3},
     {"cm",1e-2},
     {"dm",1e-1},
-    {"m",1},
+    {"m",1, true},
     {"km",1e3},
     {"Mm",1e6},
     {"inch",0.0254},
@@ -36,7 +36,7 @@ local mass_table = {
     {"mg",1e-6},
     {"g",1e-3},
     {"dag",1e-2},
-    {"kg",1},
+    {"kg",1, true},
     {"t",1e3},
     {"oz",28.349523125e-3},
     {"lb",453.59237e-3},
@@ -47,7 +47,7 @@ local time_table = {
     {"ns",1e-9},
     {"µs",1e-6},
     {"ms",1e-3},
-    {"s",1},
+    {"s",1, true},
     {"min",60},
     {"h",3600},
     {"day",3600*24},
@@ -57,7 +57,7 @@ local time_table = {
 }
 
 local energy_table = {
-    {"J",1},
+    {"J",1, true},
     {"kJ",1e3},
     {"MJ",1e6},
     {"kWh",1e3*3600},
@@ -67,7 +67,7 @@ local energy_table = {
 }
 
 local power_table = {
-    {"W",1},
+    {"W",1, true},
     {"kW",1e3},
     {"MW",1e6},
     {"cal/s",1/4.1858},
@@ -76,18 +76,54 @@ local power_table = {
 }
 
 local speed_table = {
-    {"m/s",1},
+    {"m/s",1, true},
     {"km/h",1/3.6},
     {"ft/s",1/2.23604},
     {"mph",1/2.2364},
     {"knots",1/1.94338},
 }
 
-local temperature_table = {
-    {"°C", "c2k", "k2c"},
-    {"K", "", "" },
-    {"F", "f2k", "k2f"},
+local area_table = {
+    {"mm²",1e-6},
+    {"cm²",1e-4},
+    {"dm²",1e-2},
+    {"m²",1, true},
+    {"a",1e2},
+    {"ha",1e4},
+    {"km²",1e6},
 }
+
+local volume_table = {
+    {"mm³",1e-9},
+    {"cm³",1e-6},
+    {"dm³",1e-3},
+    {"l",1e-3},
+    {"m³",1, true},
+    {"km³",1e9},
+}
+
+local pressure_table = {
+    {"mPa",1e-3},
+    {"Pa",1, true},
+    {"hPa",1e2},
+    {"kPa",1e3},
+    {"MPa",1e6},
+    {"mbar",1e2},
+    {"bar",1e5},
+    {"atm",101325},
+    {"kg/cm²",1e9},
+    {"mmHg",133.322},
+    {"Torr",133.32},
+    {"psi",6894.76},
+}
+
+
+local temperature_table = {
+    {"°C", "c2k"},
+    {"K", "", true },
+    {"°F", "f2k"},
+}
+
 
 local CalculatorConvertDialog = InputContainer:new{
     is_always_active = true,
@@ -138,14 +174,13 @@ function CalculatorConvertDialog:init()
                 UIManager:show(self.units_dialog)
             end,
         },
-        ["04_mass"] = {
-            text = "Mass",
-            is_enter_default = true,
+        ["04_speed"] = {
+            text = "Speed",
             callback = function()
                 UIManager:close(self)
                 self.units_dialog = CalculatorUnitsDialog:new{
                     parent = self,
-                    units = mass_table,
+                    units = speed_table,
                     }
                 UIManager:show(self.units_dialog)
             end,
@@ -183,19 +218,20 @@ function CalculatorConvertDialog:init()
                 UIManager:show(self.units_dialog)
             end,
         },
-        ["08_speed"] = {
-            text = "Speed",
+        ["08_mass"] = {
+            text = "Mass",
+            is_enter_default = true,
             callback = function()
                 UIManager:close(self)
                 self.units_dialog = CalculatorUnitsDialog:new{
                     parent = self,
-                    units = speed_table,
+                    units = mass_table,
                     }
                 UIManager:show(self.units_dialog)
             end,
         },
         ["09_pressure"] = {
-            text = "Volume",
+            text = "Pressure",
             callback = function()
                 UIManager:close(self)
                 self.units_dialog = CalculatorUnitsDialog:new{
@@ -216,10 +252,11 @@ function CalculatorConvertDialog:init()
                 UIManager:show(self.units_dialog)
             end,
         },
-
+--[[
         ["98_dummy"] = {
             text = "",
         },
+]]
         ["99_close"] = {
             text = "✕", --close
             callback = function()
@@ -230,7 +267,7 @@ function CalculatorConvertDialog:init()
 
     local highlight_buttons = {{}}
     local columns = 2
-    for idx, button in ffiUtil.orderedPairs(convert_buttons) do
+    for _, button in ffiUtil.orderedPairs(convert_buttons) do
         if #highlight_buttons[#highlight_buttons] >= columns then
             table.insert(highlight_buttons, {})
         end
