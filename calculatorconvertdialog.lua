@@ -276,6 +276,7 @@ function CalculatorConvertDialog:init()
 
     self[1] = ButtonDialogTitle:new{
         title = _("♺ Convert"),
+        title_align = "center",
         buttons = highlight_buttons,
     }
 
