@@ -14,6 +14,7 @@ local ffiUtil = require("ffi/util")
 local logger = require("logger")
 
 local length_table = {
+    {"Å",10e-10},
     {"nm",1e-9},
     {"µm",1e-6},
     {"mm",1e-3},
@@ -70,7 +71,7 @@ local power_table = {
     {"W",1, true},
     {"kW",1e3},
     {"MW",1e6},
-    {"cal/s",1/4.1858},
+    {"cal/s",4.1858},
     {"PS",735.5},
     {"BTU/h",293.07107017},
 }
@@ -276,6 +277,7 @@ function CalculatorConvertDialog:init()
 
     self[1] = ButtonDialogTitle:new{
         title = _("♺ Convert"),
+        title_align = "center",
         buttons = highlight_buttons,
     }
 

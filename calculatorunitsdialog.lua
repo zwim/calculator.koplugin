@@ -12,6 +12,7 @@ local HorizontalGroup = require("ui/widget/horizontalgroup")
 local HorizontalSpan = require("ui/widget/horizontalspan")
 local InputContainer = require("ui/widget/container/inputcontainer")
 local LineWidget = require("ui/widget/linewidget")
+local MovableContainer = require("ui/widget/container/movablecontainer")
 local RadioButtonTable = require("ui/widget/radiobuttontable")
 local Size = require("ui/size")
 local TextWidget = require("ui/widget/textwidget")
@@ -25,6 +26,7 @@ local CalculatorUnitsDialog = InputContainer:new{
     is_always_active = true,
     title = _("Units to convert"),
     modal = true,
+    stop_events_propagation = true,
     width = math.floor(Screen:getWidth() * 0.8),
     face = Font:getFace("cfont", 22),
     title_face = Font:getFace("x_smalltfont"),
@@ -205,12 +207,12 @@ function CalculatorUnitsDialog:init()
         }
     }
 
-    self[1] = CenterContainer:new{
-        dimen = Geom:new{
-            w = Screen:getWidth(),
-            h = Screen:getHeight(),
-        },
+    self.movable = MovableContainer:new{
         self.dialog_frame,
+    }
+    self[1] = CenterContainer:new{
+        dimen = Screen:getSize(),
+        self.movable,
     }
 end
 
