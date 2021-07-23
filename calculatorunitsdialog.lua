@@ -165,9 +165,9 @@ function CalculatorUnitsDialog:init()
                 },
                 HorizontalSpan:new{width=self.title_bar:getSize().w * 0.1},
                 VerticalGroup:new{
-                    align = "center",
+                    align = "left",
                     TextWidget:new{
-                        text = _("from"),
+                        text = _(" from:"),
                         face =  self.text_face,
                     },
                     CenterContainer:new{
@@ -179,9 +179,9 @@ function CalculatorUnitsDialog:init()
                     },
                 },
                 VerticalGroup:new{
-                    align = "center",
+                    align = "left",
                     TextWidget:new{
-                        text = _("to"),
+                        text = _(" to:"),
                         face =  self.text_face,
                     },
 

@@ -11,7 +11,6 @@ local UIManager = require("ui/uimanager")
 local _ = require("gettext")
 local Screen = require("device").screen
 local ffiUtil = require("ffi/util")
-local logger = require("logger")
 
 local length_table = {
     {"Å",10e-10},
