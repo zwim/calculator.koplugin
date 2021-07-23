@@ -123,53 +123,24 @@ end
 function Calculator:getStatusLine()
     local angle_mode = Parser:eval(Parser:parse("getAngleMode()"))
     angle_mode = self:getString(angle_mode, self.angle_modes)
-    angle_mode = angle_mode .. (" "):rep(9-#angle_mode)
+    angle_mode = angle_mode .. (" "):rep(7-#angle_mode)
     local format = self:getString(self.number_format, self.number_formats)
     format = format .. (" "):rep(12-#format)
-    return string.format(_("∡ %s      Format: %s      ≈%d"),
+    return string.format(_("∡ %s\tFormat: %s\t≈%d"),
         angle_mode, format, self.significant_places)
 end
 
-function Calculator:onCalculatorStart()
-    self.angle_mode = G_reader_settings:readSetting("calculator_angle_mode") or self.angle_mode
-    self.number_format = G_reader_settings:readSetting("calculator_number_format") or self.number_format
-    self.significant_places = G_reader_settings:readSetting("calculator_significant_places") or self.significant_places
-
-    self:addKeyboard()
-
-    if self.angle_mode ~= Parser:eval(Parser:parse("getAngleMode()")) then
-        if self.angle_mode == "radiant" then
-            Parser:eval(Parser:parse("setrad()"))
-        elseif self.angle_mode == "degree" then
-            Parser:eval(Parser:parse("setdeg()"))
-        else
-            Parser:eval(Parser:parse("setgon()"))
-        end
-    end
-
-    self.status_line = self.status_line or self:getStatusLine()
-
+function Calculator:generateInputDialog(status_line)
     local hint = _([[Enter your calculations and press '⮠'
 '♺' Convert, '⎚' Clear, '⇧' Load,
 '⇩' Store, '☰' Settings, '✕' Close
 or type 'help()⮠']])
-    local current_version = self:getCurrentVersion()
-    local latest_version = self:getLatestVersion(LATEST_VERSION, 20, 60)
 
-    if latest_version and current_version and latest_version > current_version then
-        hint = hint .. "\n\n" .. _("A calculator update is available:") .. "\n"
-        if current_version then
-            hint = hint .. "Current-" .. current_version
-        end
-        if latest_version then
-            hint = hint .. "Latest-" .. latest_version
-        end
-    end
-    self.input_dialog = InputDialog:new{
+    return InputDialog:new{
         title =  _("Calculator"),
         input_hint = hint,
-        description = self.status_line,
-        description_face= Font:getFace("scfont"),
+        description = status_line,
+        description_face = Font:getFace("scfont"),
         input = self.history,
         input_face = Font:getFace("scfont"),
         para_direction_rtl = false, -- force LTR
@@ -278,6 +249,54 @@ or type 'help()⮠']])
             end
         end,
     }
+end
+
+function Calculator:expandTabs(str, num)
+   return str:gsub("\t",(" "):rep(num))
+end
+
+function Calculator:onCalculatorStart()
+    self.angle_mode = G_reader_settings:readSetting("calculator_angle_mode") or self.angle_mode
+    self.number_format = G_reader_settings:readSetting("calculator_number_format") or self.number_format
+    self.significant_places = G_reader_settings:readSetting("calculator_significant_places") or self.significant_places
+
+    self:addKeyboard()
+
+    if self.angle_mode ~= Parser:eval(Parser:parse("getAngleMode()")) then
+        if self.angle_mode == "radiant" then
+            Parser:eval(Parser:parse("setrad()"))
+        elseif self.angle_mode == "degree" then
+            Parser:eval(Parser:parse("setdeg()"))
+        else
+            Parser:eval(Parser:parse("setgon()"))
+        end
+    end
+
+    self.status_line = self.status_line or self:getStatusLine()
+
+    local current_version = self:getCurrentVersion()
+    local latest_version = self:getLatestVersion(LATEST_VERSION, 20, 60)
+
+    local hint
+    if latest_version and current_version and latest_version > current_version then
+        hint = hint .. "\n\n" .. _("A calculator update is available:") .. "\n"
+        if current_version then
+            hint = hint .. "Current-" .. current_version
+        end
+        if latest_version then
+            hint = hint .. "Latest-" .. latest_version
+        end
+    end
+
+    -- fill status line with spaces
+    local expand = -1 -- expand tabs with x spaces
+    repeat
+        expand = expand + 1
+        self.input_dialog = self:generateInputDialog(self:expandTabs(self.status_line, expand))
+    until (self.input_dialog.description_widget[1].lines_per_page > 1 or expand > 20)
+
+    self.input_dialog = self:generateInputDialog(self:expandTabs(self.status_line, expand - 1))
+
     UIManager:show(self.input_dialog)
     self.input_dialog:onShowKeyboard(true)
 end
