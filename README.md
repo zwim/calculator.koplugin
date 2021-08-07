@@ -95,7 +95,7 @@ The following operators are supported with increasing priority:
     "!="
     ">"
     "<"
-    "+"  sing, add
+    "+"  sign, add
     "-"  sign, subtract
     "*"  multiply
     "/"  divide
