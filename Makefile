@@ -4,7 +4,7 @@ VERSION=$(shell grep Version: VERSION | sed 's/Version: //g')
 all: test clean zip
 
 test:
-	cd formulaparser && lua parser-test.lua && cd ..
+	cd formulaparser && luajit parser-test.lua && cd ..
 
 clean: 
 	rm calculator.koplugin-$(VERSION).zip -f
