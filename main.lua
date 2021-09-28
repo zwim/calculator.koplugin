@@ -134,7 +134,7 @@ function Calculator:generateInputDialog(status_line, hint)
     hint = _([[Enter your calculations and press '⮠'
 '♺' Convert, '⎚' Clear, '⇧' Load,
 '⇩' Store, '☰' Settings, '✕' Close
-or type 'help()⮠']]) .. hint
+or type 'help()⮠']]) .. (hint or "")
 
     return InputDialog:new{
         title =  _("Calculator"),
