@@ -130,11 +130,11 @@ function Calculator:getStatusLine()
         angle_mode, format, self.significant_places)
 end
 
-function Calculator:generateInputDialog(status_line)
-    local hint = _([[Enter your calculations and press '⮠'
+function Calculator:generateInputDialog(status_line, hint)
+    hint = _([[Enter your calculations and press '⮠'
 '♺' Convert, '⎚' Clear, '⇧' Load,
 '⇩' Store, '☰' Settings, '✕' Close
-or type 'help()⮠']])
+or type 'help()⮠']]) .. hint
 
     return InputDialog:new{
         title =  _("Calculator"),
@@ -277,7 +277,9 @@ function Calculator:onCalculatorStart()
     self.status_line = self.status_line or self:getStatusLine()
 
     local current_version = self:getCurrentVersion()
+    logger.info("Calculator koplugin: current version " .. current_version )
     local latest_version = self:getLatestVersion(LATEST_VERSION, 20, 60)
+    logger.info("Calculator koplugin: latest version " .. latest_version )
 
     local hint = ""
     if latest_version and current_version and latest_version > current_version then
@@ -294,10 +296,10 @@ function Calculator:onCalculatorStart()
     local expand = -1 -- expand tabs with x spaces
     repeat
         expand = expand + 1
-        self.input_dialog = self:generateInputDialog(self:expandTabs(self.status_line, expand))
+        self.input_dialog = self:generateInputDialog(self:expandTabs(self.status_line, expand), hint)
     until (self.input_dialog.description_widget[1].lines_per_page > 1 or expand > 20)
 
-    self.input_dialog = self:generateInputDialog(self:expandTabs(self.status_line, expand - 1))
+    self.input_dialog = self:generateInputDialog(self:expandTabs(self.status_line, expand - 1), hint)
 
     UIManager:show(self.input_dialog)
     self.input_dialog:onShowKeyboard(true)
