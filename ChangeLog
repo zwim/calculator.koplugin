@@ -1,7 +1,8 @@
 Version: 1.1.4
+  fix bug in update check
   better formatting of significant places
   better formatting when changing formerly entered formulas
-  type in help text
+  typo in help text
 
 Version: 1.1.2
   fix spaces/tabs help text
