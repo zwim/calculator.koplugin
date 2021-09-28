@@ -108,7 +108,7 @@ end
 
 function Calculator:onDispatcherRegisterActions()
     Dispatcher:registerAction("show_calculator",
-        { category = "none", event = "CalculatorStart", title = _("Calculator"), device = true, })
+        {category = "none", event = "CalculatorStart", title = _("Calculator"), device = true})
 end
 
 function Calculator:getString(format, table)
@@ -180,7 +180,8 @@ or type 'help()⮠']])
                     choice1_text = _("Select"),
                     choice1_callback = function()
                         UIManager:close(self.input_dialog)
-                        CalculatorSettingsDialog.choosePathFile(self, touchmenu_instance, "calculator_input_path", false, true, self.load)
+                        CalculatorSettingsDialog.choosePathFile(self, touchmenu_instance,
+                            "calculator_input_path", false, true, self.load)
                     end,
                     choice2_text = "✓", --ok
                     choice2_callback = function()
@@ -258,7 +259,8 @@ end
 function Calculator:onCalculatorStart()
     self.angle_mode = G_reader_settings:readSetting("calculator_angle_mode") or self.angle_mode
     self.number_format = G_reader_settings:readSetting("calculator_number_format") or self.number_format
-    self.significant_places = G_reader_settings:readSetting("calculator_significant_places") or self.significant_places
+    self.significant_places = G_reader_settings:readSetting("calculator_significant_places")
+        or self.significant_places
 
     self:addKeyboard()
 
@@ -311,7 +313,7 @@ function Calculator:load(old_file, file_name)
         end
         file:close()
     else
-        logger.warn("Failed to load file from " ..file_name )
+        logger.warn("Failed to load file from " .. file_name )
     end
     if old_file then
         self:onCalculatorStart()
@@ -367,7 +369,8 @@ function Calculator:formatMantissaExponent(val, eng)
         shift_exp = exp % 3
         mantissa = mantissa * 10^shift_exp
     end
-    local ret = "" .. math.floor(mantissa * 10^(self.significant_places-1) + 0.5)/(10^(self.significant_places-1))
+    local ret = "" .. math.floor(mantissa * 10^self.significant_places + 0.5)
+        / (10^self.significant_places)
     if mantissa ~= 0 then
         ret = ret .. "E" .. tostring(exp-shift_exp >= 0 and "+" or "") .. tostring(exp-shift_exp)
     end
@@ -398,11 +401,12 @@ function Calculator:formatResult(val, format)
         if math.abs(val) >= 10^self.upper_bound or math.abs(val) <= 0.1^self.lower_bound then
             ret = self:formatMantissaExponent(val, false)
         else
-            local msb = math.floor(math.log10(math.abs(val))) -- most significant place
-            if val >= 1 then
-                msb = 0
+            local msp = math.floor(math.log10(math.abs(val))) -- most significant place
+            if val > 1 then
+                msp = 1
             end
-            ret = "" .. math.floor(val * 10^(self.significant_places-msb-1)+0.5)/10^(self.significant_places-msb-1)
+            ret = "" .. math.floor(val * 10^(self.significant_places-msp+1)+0.5)
+                / 10^(self.significant_places-msp+1)
         end
     end
 
@@ -443,10 +447,13 @@ function Calculator:calculate(input_text)
             break
         end
     end
-    if command_position and input_table[command_position] == " " then
+    if not command_position then
         return
     end
-    if command_position and input_table[command_position] then
+    if input_table[command_position] == " " then
+        return
+    end
+    if input_table[command_position] then
         local new_command = input_table[command_position]
         new_command = new_command:gsub("^ *","")
         new_command = new_command:gsub(" *$","")
@@ -470,7 +477,7 @@ function Calculator:calculate(input_text)
             last_result = self:formatResult(last_result, self.number_format, self.significant_places)
 
             if command_position ~= #input_table then  -- an old entry was changed
-                self.history = input_text .. "\ni" .. #self.input .. ": " .. new_command
+                self.history = self.history .. "\ni" .. #self.input .. ": " .. new_command
             else -- a new formula is entered
                 local index = input_text:find("\n[^\n]*$")
                 if not index then -- first entry
