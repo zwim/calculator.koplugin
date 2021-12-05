@@ -277,9 +277,9 @@ function Calculator:onCalculatorStart()
     self.status_line = self.status_line or self:getStatusLine()
 
     local current_version = self:getCurrentVersion()
-    logger.info("Calculator koplugin: current version " .. current_version )
+    logger.info("Calculator koplugin: current version " .. tostring(current_version) )
     local latest_version = self:getLatestVersion(LATEST_VERSION, 20, 60)
-    logger.info("Calculator koplugin: latest version " .. latest_version )
+    logger.info("Calculator koplugin: latest version " .. tostring(latest_version) )
 
     local hint = ""
     if latest_version and current_version and latest_version > current_version then
