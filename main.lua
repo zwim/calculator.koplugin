@@ -294,10 +294,14 @@ function Calculator:onCalculatorStart()
 
     -- fill status line with spaces
     local expand = -1 -- expand tabs with x spaces
+    self.input_dialog = self:generateInputDialog(self:expandTabs(self.status_line, 1), hint)
+    local old_height = self.input_dialog.title_bar:getHeight()
+    print("xxx", old_height, expand)
     repeat
         expand = expand + 1
         self.input_dialog = self:generateInputDialog(self:expandTabs(self.status_line, expand), hint)
-    until (self.input_dialog.description_widget[1].lines_per_page > 1 or expand > 20)
+        print("xxx", old_height, expand )
+    until (expand > 50 or self.input_dialog.title_bar:getHeight() ~= old_height )
 
     self.input_dialog = self:generateInputDialog(self:expandTabs(self.status_line, expand - 1), hint)
 
@@ -520,7 +524,7 @@ function Calculator:getLatestVersion(url, timeout, maxtime)
     local socketutil = require("socketutil")
 
     local sink = {}
-    socketutil:set_timeout(timeout or 10, maxtime or 30)
+    socketutil:set_timeout(timeout or 3, maxtime or 5)
     local request = {
         url     = url,
         method  = "GET",

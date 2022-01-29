@@ -17,6 +17,7 @@ zip: clean
 	rsync -a --cvs-exclude \
 		--exclude '*.editorconfig' \
 		--exclude '*.gitignore' \
+		--exclude '*.circleci' \
 		--exclude 'Makefile' \
 		--exclude 'LICENSE' \
 		--exclude 'README.md' \
