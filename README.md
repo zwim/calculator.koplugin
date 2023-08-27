@@ -13,6 +13,8 @@ The file `VERSION` is used for update-informations. If you delete it, you don't 
 
 You find the calculator in `More tools/calculator` additionally you can set a gesture (in the device submenu) to call it.
 
+If you select a text starting with a number in reader and long press on it (>4 seconds), then you can select `Convert unit`, which directly brings you to unit conversion. (see: https://github.com/koreader/koreader/issues/10834)
+
 Enter a calculation and press `⮠`. You can see your inputs in lines starting with `ixxx:` and the results in lines with `oxxx:`.
 
 If you change something in an old line, this line will be used for the next calculation.
