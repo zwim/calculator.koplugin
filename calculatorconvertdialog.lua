@@ -127,7 +127,7 @@ local temperature_table = {
 
 local CalculatorConvertDialog = InputContainer:new{
     is_always_active = true,
-    title = _("Convert"),
+    title = title or _("Convert"),
     modal = true,
     width = math.floor(Screen:getWidth() * 0.8),
     face = Font:getFace("cfont", 22),
@@ -275,11 +275,10 @@ function CalculatorConvertDialog:init()
     end
 
     self[1] = ButtonDialogTitle:new{
-        title = _("♺ Convert"),
+        title = self.title or _("♺ Convert"),
         title_align = "center",
         buttons = highlight_buttons,
     }
-
 end
 
 function CalculatorConvertDialog:onShow()

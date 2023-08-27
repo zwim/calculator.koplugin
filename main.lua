@@ -61,7 +61,7 @@ local Calculator = WidgetContainer:new{
         },
     significant_places = 5, -- decimal places
     lower_bound = 4, -- switch to scientific if <=10^lower_bound
-    upper_bound = 6 -- switch to scientific if >=10^upper_bound
+    upper_bound = 6, -- switch to scientific if >=10^upper_bound
 }
 
 function Calculator:init()
@@ -74,6 +74,23 @@ function Calculator:init()
     end
     self:onDispatcherRegisterActions()
     self.ui.menu:registerToMainMenu(self)
+
+    -- Add button to readerhighlight dialog
+    if self.ui.highlight then
+        self.ui.highlight:addToHighlightDialog("13_convert", function(this)
+            return {
+                text = _("Convert Unit"),
+                show_in_highlight_dialog_func = function()
+                    return this.selected_text.text:find("^%p*%d+") ~= nil
+                end,
+                callback = function()
+                    self:convertUnit(this.selected_text.text)
+                    this:onClose()
+                end,
+            }
+        end)
+    end
+
 end
 
 function Calculator:addKeyboard()
@@ -256,6 +273,33 @@ function Calculator:expandTabs(str, num)
    return str:gsub("\t",(" "):rep(num))
 end
 
+function Calculator:convertUnit(text_containing_unit)
+    self:onCalculatorStart()
+
+    -- delete multiline --
+    if text_containing_unit:find("\n") then
+        text_containing_unit = text_containing_unit:sub(1, text_containing_unit:find("\n") - 1)
+    end
+    -- get only first number (incl. decimal)
+    local number_pattern = "%d+[.,]*%d*"
+    local text_without_unit = text_containing_unit
+    if text_containing_unit:find(number_pattern) then
+        text_without_unit = text_containing_unit:sub(text_containing_unit:find(number_pattern))
+    end
+
+    self.history = self.history .. text_without_unit
+    self.input_dialog:setInputText(self.history)
+    self.input_dialog._input_widget:goToEndOfLine()
+
+    self:calculate(self.history)
+
+    self.convert_dialog = CalculatorConvertDialog:new{
+        parent = self,
+        title = "♺ Convert: " .. text_containing_unit,
+    }
+    UIManager:show(self.convert_dialog)
+end
+
 function Calculator:onCalculatorStart()
     self.angle_mode = G_reader_settings:readSetting("calculator_angle_mode") or self.angle_mode
     self.number_format = G_reader_settings:readSetting("calculator_number_format") or self.number_format
@@ -296,11 +340,9 @@ function Calculator:onCalculatorStart()
     local expand = -1 -- expand tabs with x spaces
     self.input_dialog = self:generateInputDialog(self:expandTabs(self.status_line, 1), hint)
     local old_height = self.input_dialog.title_bar:getHeight()
-    print("xxx", old_height, expand)
     repeat
         expand = expand + 1
         self.input_dialog = self:generateInputDialog(self:expandTabs(self.status_line, expand), hint)
-        print("xxx", old_height, expand )
     until (expand > 50 or self.input_dialog.title_bar:getHeight() ~= old_height )
 
     self.input_dialog = self:generateInputDialog(self:expandTabs(self.status_line, expand - 1), hint)
